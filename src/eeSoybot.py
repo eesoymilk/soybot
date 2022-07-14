@@ -1,7 +1,7 @@
 import asyncio
 
-from config import *
 from discord.ext import commands
+from config import *
 from cogs.listeners import Listeners
 from cogs.soy_commands import SoyCommands
 
@@ -13,3 +13,4 @@ class eeSoybot(commands.Bot):
             self.add_cog(Listeners(self)),
             self.add_cog(SoyCommands(self))
         )
+        await self.tree.sync()
