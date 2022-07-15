@@ -1,9 +1,13 @@
 import asyncio
+import discord
 
 from discord.ext import commands
 from config import *
 from cogs.listeners import Listeners
 from cogs.soy_commands import SoyCommands
+
+
+TEST_GUILD = discord.Object(guilds['debug'])
 
 
 class eeSoybot(commands.Bot):
@@ -13,4 +17,4 @@ class eeSoybot(commands.Bot):
             self.add_cog(Listeners(self)),
             self.add_cog(SoyCommands(self))
         )
-        await self.tree.sync()
+        await self.tree.sync(guild=TEST_GUILD)

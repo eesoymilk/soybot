@@ -1,5 +1,4 @@
 import discord
-import asyncio
 import logging
 import logging.handlers
 import os
