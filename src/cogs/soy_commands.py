@@ -4,9 +4,9 @@ import asyncio
 from discord import app_commands
 from discord.ext import commands
 from discord.app_commands import Choice, Range
-from commands.poll import Poll
-from commands.starburst import starburst_stream
-from config import *
+from commands import Poll
+from commands import starburst_stream
+from utils import Config
 
 
 class SoyCommands(commands.Cog):
@@ -16,7 +16,7 @@ class SoyCommands(commands.Cog):
 
     # Starburst Stream
     @app_commands.command(name="starburst", description='C8763')
-    @app_commands.guilds(*guild_ids)
+    @app_commands.guilds(*Config.guild_ids)
     async def starburst(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(await starburst_stream())
 
@@ -34,7 +34,7 @@ class SoyCommands(commands.Cog):
             Choice(name='複選', value='multiple'),
         ]
     )
-    @app_commands.guilds(*guild_ids)
+    @app_commands.guilds(*Config.guild_ids)
     @app_commands.guild_only()
     async def poll_coro(
         self,
@@ -56,7 +56,6 @@ class SoyCommands(commands.Cog):
         await poll.start()
         await asyncio.sleep(3)
         await poll.end()
-        ...
 
     # manually sync commands
     @commands.command(name="sync")

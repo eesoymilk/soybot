@@ -2,8 +2,7 @@
 import random
 import discord
 import asyncio
-from typing import Union
-from config import *
+from utils.config import *
 
 
 def rand(x=1.0) -> bool: return x > random.random()

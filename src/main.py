@@ -1,10 +1,18 @@
 import discord
+import logging
+import logging.handlers
 import os
 
-from eeSoybot import eeSoybot
 from dotenv import load_dotenv
-from config import *
+from utils.config import *
+from utils.eeSoybot import eeSoybot
+from utils.lumberjack import get_lumberjack
 
+
+# Multiple calls to getLogger() with the same name will return a reference to the same logger object.
+# Hence, we are just calling the preset loggers in discord.py
+logger = get_lumberjack(name='discord')
+logging.getLogger('discord.http').setLevel(logging.INFO)
 
 bot = eeSoybot(
     command_prefix='?',
