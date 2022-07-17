@@ -4,24 +4,22 @@ from datetime import datetime
 from discord import ui
 
 
-def list_to_str(l: list[str], sep: str = ' ', bold: bool = True, italic: bool = False) -> str:
-    output = ''
+def join_str(l: list[str], sep='', bold=False, italic=False) -> str:
     wrap = ''
     if bold:
         wrap += '**'
     if italic:
         wrap += '*'
-    for s in l:
-        output += wrap + s + wrap + sep
-    output = output[:-1]
-    return output
+    if wrap:
+        l = [f'{wrap}{s}{wrap}' for s in l]
+    return sep.join(l)
 
 
 def poll_result_embed(poll):
     embed = discord.Embed(
         color=poll.color,
         title=f'投票結果 - **{poll.title}**',
-        description=f'**{poll.description["anonymity"]}{poll.description["format"]}**',
+        description=join_str(list(poll.description.values())[:-1]),
         timestamp=datetime.now(),
     )
     embed.set_footer(
@@ -41,13 +39,16 @@ def poll_result_embed(poll):
         reverse=True
     )))
 
+    if len(zero_pools) == len(poll.pools):
+        embed.description = f'{embed.description}\n**沒有任何人投票**\n**可憐！**'
+
     fields: list[dict[str, str]]
 
     # vote pools
     if poll.is_public:
         fields = [{
             'name': f'**{len(pool)}**票 - **{option}**',
-            'value': list_to_str([voter.display_name for voter in pool], sep='\n'),
+            'value': join_str([voter.display_name for voter in pool], sep='\n'),
             'inline': False
         } for option, pool in sorted_pools if pool]
     else:
@@ -57,27 +58,25 @@ def poll_result_embed(poll):
         } for option, pool in sorted_pools if pool]
 
     # Zero pools
+
+    zero_field = {'name': '**0**票'}
     if len(zero_pools) == 1:
         if poll.is_public:
-            fields += [{'name': f'**0**票 - **{zero_pools[0]}**',
-                        'value': '**None**'}]
+            zero_field['name'] += f' - **{zero_pools[0]}**'
+            zero_field['value'] = 'None'
         else:
-            fields += [{'name': f'**0**票',
-                        'value': f'**{zero_pools[0]}**'}]
-    elif len(zero_pools) == len(poll.pools):
-        fields += [{'name': '**沒有任何人投票，可憐！**\n以下為本次投票選項',
-                    'value': list_to_str(zero_pools, sep='\n'),
-                    'inline': False}]
+            zero_field['value'] = f'**{zero_pools[0]}**'
     elif len(zero_pools) > 1:
-        fields += [{'name': '**0**票選項',
-                    'value': list_to_str(zero_pools, sep='\n'),
-                    'inline': False}]
+        zero_field['name'] += '選項'
+        zero_field['value'] = join_str(zero_pools, sep='\n')
+        zero_field['inline'] = False
+    fields += [zero_field]
 
     # show anonymous voters
     if not poll.is_public and len(zero_pools) < len(poll.pools):
         fields += [{
-            'name': f'本次參與投票人數 - **{len(poll.voters)}** 人',
-            'value': list_to_str([voter.display_name for voter in poll.voters], sep='\n'),
+            'name': f'本次共有**{len(poll.voters)}**人參與投票',
+            'value': join_str([voter.display_name for voter in poll.voters], sep='\n'),
             'inline': False
         }]
 
@@ -104,14 +103,7 @@ class PollDetails(ui.Modal):
 
     def __init__(self, poll) -> None:
         self.poll = poll
-        modal_title = '發起【公開單選、限時20秒】的投票'
-        if not self.poll.is_public:
-            modal_title = modal_title.replace('公開', '匿名')
-        if not self.poll.is_single:
-            modal_title = modal_title.replace('單選', '多選')
-        if self.poll.duration != 20.0:
-            modal_title = modal_title.replace('20', str(self.poll.duration))
-        super().__init__(title=modal_title)
+        super().__init__(title=f'【{join_str(poll.description.values())}】的投票')
 
     async def on_timeout(self):
         ...
@@ -137,7 +129,11 @@ class PollDetails(ui.Modal):
         self.poll.poll_embed = discord.Embed(
             color=self.poll.color,
             title=f'投票開始 - **{self.poll.title}**',
-            description=f'{self.poll.description["anonymity"]}{self.poll.description["format"]}\n限時{self.poll.duration}秒',
+            # description=f'{self.poll.description["anonymity"]}{self.poll.description["format"]}\n限時{self.poll.duration}秒',
+            description=join_str(
+                self.poll.description.values(),
+                sep='\n'
+            ),
         )
         self.poll.poll_embed.set_footer(
             text=f'由 {interaction.user.display_name} 發起',
@@ -224,6 +220,7 @@ class Poll:
         return {
             'anonymity': '公開' if self.is_public else '匿名',
             'format': '單選' if self.is_single else '複選',
+            'duration': f'限時{str(self.duration).rstrip("0").rstrip(".")}秒',
         }
 
     async def prompt_details(self) -> None:

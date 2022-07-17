@@ -7,12 +7,16 @@ from discord.app_commands import Choice, Range
 from commands import Poll
 from commands import starburst_stream
 from utils import Config
+from utils.lumberjack import get_lumberjack
 
 
 class SoyCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._last_member: discord.Member | discord.User | None = None
+        self.logger = get_lumberjack('SoyCommands')
+        self.logger.info('SoyCommands is loaded.')
+        self.logger.warning(f'{Config.guild_ids=}')
 
     # Starburst Stream
     @app_commands.command(name="starburst", description='C8763')

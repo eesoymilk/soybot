@@ -1,47 +1,51 @@
-from dataclasses import dataclasses
+import os
+from dotenv import load_dotenv
+from dataclasses import dataclass
 
-import discord
+
+load_dotenv()
 
 
-@dataclasses()
+@dataclass(frozen=True)
 class Guild:
     id: int
-    bot_roles: tuple[str]
+    bot_roles: tuple[str] | None = None
 
 
-@dataclasses()
-class SoyResponse:
-    activation_probability: float
-
-
-@dataclasses()
-class SoyReact(SoyResponse):
-    count: int
+@dataclass(frozen=True)
+class SoyReact():
     emoji_tags: tuple[str]
+    count: int = 1
+    activation_probability: float = 1.0
 
 
-@dataclasses()
-class SoyReply(SoyResponse):
+@dataclass(frozen=True)
+class SoyReply():
     messages_pool: tuple[str]
+    activation_probability: float = 1.0
 
 
-@dataclasses()
+@dataclass(frozen=True)
 class User:
     id: int
-    soy_reply: SoyReply
-    soy_react: SoyReact
+    soy_reply: SoyReply | None = None
+    soy_react: SoyReact | None = None
 
 
-@dataclasses()
+@dataclass(frozen=True)
 class Emoji:
     id: int | str
     tags: tuple[str]
 
 
 class Config:
+    TOKEN = os.environ.get('TOKEN')
+
     guilds = {'nthu': Guild(id=771595191638687784,
                             bot_roles={771595191638687784, 771681968886251543, 771675662531428374, 955800304492871741}),
               'debug': Guild(id=874556062815100938)}
+
+    guild_ids = tuple(guild.id for guild in guilds.values())
 
     users = {
         'soymilk': User(id=202249480148353025),
@@ -69,18 +73,24 @@ class Config:
         'partying_face': Emoji('🥳', ('party',))
     }
 
+    emoji_ids_by_tag = {}
+
     # keywords_responses = (
     #     (('甲', '阿玉', '阿衡', '阿雪', '雪夜', '紙袋', '袋袋',
     #      '阿袋', 'ayu'), (SoyReact(0.3, 1, ['gay']))),
     # )
 
-    @property
-    def guild_ids(self):
-        return [guild.id for guild in self.guilds.values()]
+    def get_emoji_ids_by_tags(self, *tags):
+        result_emoji_ids = []
 
-    def emoji_ids_by_tags(cls, *tags):
-        return [e.id for e in cls.emojis.values()
-                if any([t in e.tags for t in tags])]
+        for t in tags:
+            if t not in self.emoji_ids_by_tag:
+                self.emoji_ids_by_tag[t] = [
+                    e.id for e in self.emojis.values() if t in e.tags
+                ]
+            result_emoji_ids += self.emoji_ids_by_tag[t]
+
+        return result_emoji_ids
 
 
 emojis = {
@@ -92,7 +102,6 @@ emojis = {
          991676443174129764,
          991677470216552620,
          991676592533295164],
-    'wtf': [931022665790144542, 848135201439612978],
     'ayu': [994198292382634025, 989934658454183946],
     'gay': [786891103722930206],
     'fuck': [958223671779024950],

@@ -1,2 +1,2 @@
-from poll import *
-from starburst import *
+from commands.poll import *
+from commands.starburst import *

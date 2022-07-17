@@ -27,7 +27,7 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
     if emoji is not None:
         log_msg += f' {emoji}'
     if content is not None:
-        log_msg += f' :\n{content}'
+        log_msg += f': {content}'
 
     return log_msg
 
@@ -63,8 +63,16 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        self.logger.info(
-            f'{reaction.message.channel.guild.name} {reaction.message.channel.name} {reaction.message.author.display_name} {reaction.emoji}')
+        log_details = {
+            'guild': reaction.message.guild.name,
+            'channel': reaction.message.channel.name,
+            'display_name': user.display_name,
+            'receiver': reaction.message.author.display_name
+            if user.display_name != reaction.message.author.display_name else None,
+            'emoji': reaction.emoji,
+        }
+
+        self.logger.info(rich_logging_formatter(**log_details))
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):

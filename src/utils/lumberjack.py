@@ -72,6 +72,7 @@ class RichLoggingFormat(logging.Formatter):
 
         if record.name == 'Listeners':
             funcName_rich = '{funcName}'
+            record.funcName = record.funcName.replace('on_', '')
 
         if self.is_console:
             level_bg, level_color = self.Level_Rich_Formats[record.levelno]
@@ -80,11 +81,10 @@ class RichLoggingFormat(logging.Formatter):
             name_rich = f'{self.name_color}{name_rich}'
             funcName_rich = f'{funcName_rich}'
             message_rich = f'{ANSI.Reset}{message_rich}'
-        else:
-            # get rid of ANSI charaters
+        else:   # get rid of ANSI charaters
             record.msg = re.sub(r'\u001b\[\d\d?(;\d)?m', '', record.msg)
 
-        rich_format = f'{asctime_rich} {level_rich} {name_rich} {funcName_rich} {message_rich}'
+        rich_format = f'{asctime_rich} {level_rich} {name_rich} {funcName_rich} | {message_rich}'
         date_format = '%Y-%m-%d %H:%M:%S'
         super().__init__(rich_format, date_format, '{')
         return super().format(record)
@@ -93,6 +93,11 @@ class RichLoggingFormat(logging.Formatter):
 def get_lumberjack(name: str, name_color=ANSI.BrightBlue, file_level=logging.DEBUG, console_level=logging.INFO) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(file_level)
+
+    # console handler
+    ch = logging.StreamHandler()
+    ch.setLevel(console_level)
+    ch.setFormatter(RichLoggingFormat(name_color=name_color, is_console=True))
 
     # file handler
     fh = logging.handlers.RotatingFileHandler(
@@ -104,12 +109,7 @@ def get_lumberjack(name: str, name_color=ANSI.BrightBlue, file_level=logging.DEB
     )
     fh.setFormatter(RichLoggingFormat())
 
-    # console handler
-    ch = logging.StreamHandler()
-    ch.setLevel(console_level)
-    ch.setFormatter(RichLoggingFormat(True, name_color))
-
-    logger.addHandler(fh)
     logger.addHandler(ch)
+    logger.addHandler(fh)
 
     return logger
