@@ -4,7 +4,11 @@ import asyncio
 
 from discord import app_commands
 from discord.ext import commands
-from discord.app_commands import guilds, describe, rename, choices, guild_only, Choice, Range
+from discord.app_commands import (
+    guilds, describe, rename, choices, guild_only,
+    Choice, Range,
+    AppCommandError, CommandOnCooldown
+)
 from commands import Poll
 from commands import starburst_stream
 from utils import ANSI
@@ -17,7 +21,8 @@ class SoyCommands(commands.Cog):
         self.bot = bot
         self._last_member: discord.Member | discord.User | None = None
 
-        self.bot.tree.add_command(app_commands.ContextMenu(
+        bot.tree.on_error = self.on_app_command_error
+        bot.tree.add_command(app_commands.ContextMenu(
             name='稽查頭貼',
             callback=self.avatar_ctx_menu,
         ))
@@ -27,7 +32,7 @@ class SoyCommands(commands.Cog):
 
     # Starburst Stream slash command
     @app_commands.command(name="starburst", description='C8763')
-    # @app_commands.checks.cooldown(rate=1, per=10)
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
     @guilds(*Config.guild_ids)
     async def starburst(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(await starburst_stream())
@@ -81,8 +86,10 @@ class SoyCommands(commands.Cog):
         if interaction.user.id == target.id:
             description = f'**{interaction.user.display_name}** 稽查了自己的頭貼'
 
+        color = target.color
+
         embed = discord.Embed(
-            color=discord.Color.random(),
+            color=color,
             description=description,
             type='image',
             # url='user.display_avatar.url',
@@ -95,9 +102,19 @@ class SoyCommands(commands.Cog):
     @rename(target='稽查對象')
     @guilds(*Config.guild_ids)
     @guild_only()
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_slash(self, interaction: discord.Interaction, target: discord.Member) -> None:
         await self.avatar_coro(interaction, target)
 
     @guilds(*Config.guild_ids)
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_ctx_menu(self, interaction: discord.Interaction, user: discord.Member):
+        if user.id == self.bot.user.id:
+            await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人的頭貼好ㄇ', ephemeral=True)
+            return
         await self.avatar_coro(interaction, target=user)
+
+    async def on_app_command_error(self, interaction: discord.Interaction, error: AppCommandError):
+        if isinstance(error, CommandOnCooldown):
+            msg = f'冷卻中...\n請稍後**{str(round(error.retry_after, 2)).rstrip("0").rstrip(".")}**秒再試'
+            await interaction.response.send_message(msg, ephemeral=True)
