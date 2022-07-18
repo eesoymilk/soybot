@@ -1,3 +1,4 @@
+from datetime import datetime
 import discord
 import asyncio
 
@@ -18,7 +19,7 @@ class SoyCommands(commands.Cog):
 
         self.bot.tree.add_command(app_commands.ContextMenu(
             name='稽查頭貼',
-            callback=self.avatar,
+            callback=self.avatar_ctx_menu,
         ))
 
         self.logger = get_lumberjack('SoyCommands', ANSI.BrightGreen)
@@ -75,28 +76,28 @@ class SoyCommands(commands.Cog):
         await self.bot.tree.sync(guild=ctx.guild)
         await ctx.send('commands synced.')
 
-    # @app_commands.checks.cooldown(rate=1, per=10)
-    @guilds(*Config.guild_ids)
-    async def avatar(self, interaction: discord.Interaction, user: discord.Member):
+    async def avatar_coro(self, interaction: discord.Interaction, target: discord.Member):
+        description = f'**{interaction.user.display_name}** 稽查了 **{target.display_name}** 的頭貼'
+        if interaction.user.id == target.id:
+            description = f'**{interaction.user.display_name}** 稽查了自己的頭貼'
+
         embed = discord.Embed(
-            title=f'{user.display_name} 的頭貼是 **伊織萌**',
-            color=discord.Color.random()
+            color=discord.Color.random(),
+            description=description,
+            type='image',
+            # url='user.display_avatar.url',
+            timestamp=datetime.now(),
         )
-        # embed.set_author(name=interaction.user.display_name,
-        #                  icon_url=interaction.user.display_avatar.url)
-        embed.set_image(url=user.display_avatar.url)
-        await interaction.response.send_message(embed=embed)
+        embed.set_image(url=target.display_avatar.url)
+        await interaction.response.send_message(f'{target.mention} 的頭貼是 **伊織萌** {self.bot.get_emoji(780263339808522280)}', embed=embed)
 
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
-        print('error handler fired')
-        return await super().cog_command_error(ctx, error)
+    @app_commands.command(name="avatar", description='稽查頭貼')
+    @rename(target='稽查對象')
+    @guilds(*Config.guild_ids)
+    @guild_only()
+    async def avatar_slash(self, interaction: discord.Interaction, target: discord.Member) -> None:
+        await self.avatar_coro(interaction, target)
 
-    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
-        print('error handler fired')
-        # if isinstance(error, app_commands.CommandOnCooldown):
-        await interaction.response.send_message(str(error), ephemeral=True)
-        # return await super().cog_command_error(interaction, error)
-    # @app_commands.error
-    # async def error_handler(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
-    #     if isinstance(error, app_commands.CommandOnCooldown):
-    #         await interaction.response.send_message(str(error), ephemeral=True)
+    @guilds(*Config.guild_ids)
+    async def avatar_ctx_menu(self, interaction: discord.Interaction, user: discord.Member):
+        await self.avatar_coro(interaction, target=user)

@@ -3,13 +3,7 @@ import random
 import discord
 from datetime import datetime
 from discord.ext import commands
-
-# from events.message import react_user, react_keyword
 from utils import Config, SoyReact, SoyReply, ANSI, get_lumberjack
-
-
-def logging_formatter(guild, channel, user, ) -> str:
-    ...
 
 
 def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:

@@ -50,8 +50,12 @@ class Config:
     users = {
         'soymilk': User(
             id=202249480148353025,
-            soy_react=SoyReact(emoji_tags=('soymilk'),
+            soy_react=SoyReact(emoji_tags=('soymilk',),
                                activation_probability=0.1)),
+        'gay_dog': User(
+            id=284350778087309312,
+            soy_react=SoyReact(emoji_tags=('disgusted',),
+                               activation_probability=0.4)),
         'howard': User(
             id=613683023300395029,
             soy_react=SoyReact(emoji_tags=('wtf',),
@@ -64,10 +68,6 @@ class Config:
             id=402060040518762497,
             soy_react=SoyReact(emoji_tags=('gay',),
                                activation_probability=0.3)),
-        'gay_dog': User(
-            id=284350778087309312,
-            soy_react=SoyReact(emoji_tags=('disgusted',),
-                               activation_probability=0.4)),
         'feilin': User(
             id=388739972343267329,
             soy_react=SoyReact(emoji_tags=('feilin',),
@@ -76,10 +76,10 @@ class Config:
             id=777196949903376396,
             soy_react=SoyReact(emoji_tags=('pineapplebun',),
                                activation_probability=0.3)),
-        'carl_bot': User(
-            id=235148962103951360,
-            soy_react=SoyReact(emoji_tags=('gay',),
-                               activation_probability=0.1)),
+        # 'carl_bot': User(
+        #     id=235148962103951360,
+        #     soy_react=SoyReact(emoji_tags=('gay',),
+        #                        activation_probability=0.1)),
     }
 
     emojis = {
