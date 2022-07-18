@@ -1,12 +1,11 @@
 import asyncio
-import logging
+import random
 import discord
 from datetime import datetime
 from discord.ext import commands
 
 # from events.message import react_user, react_keyword
-from utils.config import *
-from utils.lumberjack import ANSI, get_lumberjack
+from utils import Config, SoyReact, SoyReply, ANSI, get_lumberjack
 
 
 def logging_formatter(guild, channel, user, ) -> str:
@@ -32,16 +31,35 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
     return log_msg
 
 
+def chance(x: float = 1.0) -> bool:
+    return x > random.random()
+
+
+async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot):
+    if soy_react is None or not chance(soy_react.activation_probability):
+        return
+
+    matched_ids = Config.get_emoji_ids_by_tags(*soy_react.emoji_tags)
+    emojis = [id if isinstance(id, str) else bot.get_emoji(id)
+              for id in random.sample(matched_ids, soy_react.count)]
+    await asyncio.gather(*(msg.add_reaction(emoji) for emoji in emojis))
+
+
+async def reply_msg(soy_reply: SoyReply, msg: discord.Message, bot: commands.Bot):
+    ...
+
+
 class Listeners(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._last_member = None
         self.logger = get_lumberjack('Listeners', ANSI.BrightGreen)
-        self.logger.info("Listeners cog initialized.")
+        self.logger.info('initialized')
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
-        if msg.author == self.bot.user:
+        # ignore own message
+        if msg.author.id == self.bot.user.id:
             return
 
         log_details = {
@@ -50,16 +68,13 @@ class Listeners(commands.Cog):
             'display_name': msg.author.display_name,
             'content': msg.content,
         }
-
         self.logger.info(rich_logging_formatter(**log_details))
 
-        # self.logger.info(
-        #     f'{msg.channel.guild.name} {msg.channel.name} {msg.author.display_name} {msg.content}')
-
-        # await asyncio.gather(
-        #     react_user(self.bot, msg),
-        #     react_keyword(self.bot, msg)
-        # )
+        aws = []
+        soy_react, soy_reply = Config.get_action_by_user_id(msg.author.id)
+        aws.append(react_msg(soy_react, msg, self.bot))
+        aws.append(reply_msg(soy_reply, msg, self.bot))
+        await asyncio.gather(*aws)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):

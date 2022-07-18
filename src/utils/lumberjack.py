@@ -70,21 +70,20 @@ class RichLoggingFormat(logging.Formatter):
         funcName_rich = ''
         message_rich = '{message}'
 
-        if record.name == 'Listeners':
-            funcName_rich = '{funcName}'
-            record.funcName = record.funcName.replace('on_', '')
+        if record.name in ['Listeners', 'SoyCommands']:
+            funcName_rich = ' {funcName}'
+            record.funcName = record.funcName.lstrip('on_')
 
         if self.is_console:
             level_bg, level_color = self.Level_Rich_Formats[record.levelno]
             asctime_rich = f'{ANSI.BrightBlack}{asctime_rich}{ANSI.Reset}'
             level_rich = f'{level_bg}{level_color}{level_rich}{ANSI.Reset}'
             name_rich = f'{self.name_color}{name_rich}'
-            funcName_rich = f'{funcName_rich}'
             message_rich = f'{ANSI.Reset}{message_rich}'
         else:   # get rid of ANSI charaters
             record.msg = re.sub(r'\u001b\[\d\d?(;\d)?m', '', record.msg)
 
-        rich_format = f'{asctime_rich} {level_rich} {name_rich} {funcName_rich} | {message_rich}'
+        rich_format = f'{asctime_rich} {level_rich} {name_rich}{funcName_rich} | {message_rich}'
         date_format = '%Y-%m-%d %H:%M:%S'
         super().__init__(rich_format, date_format, '{')
         return super().format(record)
@@ -101,7 +100,7 @@ def get_lumberjack(name: str, name_color=ANSI.BrightBlue, file_level=logging.DEB
 
     # file handler
     fh = logging.handlers.RotatingFileHandler(
-        filename=f'{name}.log',
+        filename=f'logs\\{name}.log',
         maxBytes=32 * 1024 * 1024,  # 32 MiB
         backupCount=5,  # Rotate through 5 files
         encoding='utf-8',

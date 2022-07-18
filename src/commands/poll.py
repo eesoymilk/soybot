@@ -1,7 +1,9 @@
 import discord
-
-from datetime import datetime
 from discord import ui
+from utils import get_lumberjack
+from datetime import datetime
+
+logger = get_lumberjack('Poll')
 
 
 def join_str(l: list[str], sep='', bold=False, italic=False) -> str:
@@ -106,11 +108,17 @@ class PollDetails(ui.Modal):
         super().__init__(title=f'【{join_str(poll.description.values())}】的投票')
 
     async def on_timeout(self):
-        ...
+        logger.warning(
+            f'{self.poll.chat_interaction.user.display_name}\'s Modal timeout'
+        )
 
     async def on_submit(self, interaction: discord.Interaction):
         # defer the response so that it can be called in poll.start()
         # await interaction.response.defer()
+
+        logger.info(
+            f'{self.poll.chat_interaction.user.display_name}\'s Modal received.'
+        )
 
         # setup poll details
         self.poll.modal_interaction = interaction
@@ -140,11 +148,15 @@ class PollDetails(ui.Modal):
             icon_url=interaction.user.display_avatar.url
         )
 
+        logger.info(
+            f'{self.poll.chat_interaction.user.display_name}\'s Poll is ready.'
+        )
+
         # stop the view so that the coro proceed
         self.stop()
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
-        print(error)
+        logger.exception(error)
         await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
         # Make sure we know what the error actually is
         # traceback.print_tb(error.__traceback__)
@@ -165,6 +177,10 @@ class PollSelect(ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        logger.info(
+            f'{self.poll.title} | {interaction.user.display_name} | {self.values}'
+        )
+
         self.poll.voters.add(interaction.user)
 
         if self.poll.is_single:
@@ -208,12 +224,17 @@ class Poll:
 
         self.modal_interaction: discord.Interaction
         self.color: discord.Color
+        self.title: str
         self.poll_view: ui.View
         self.poll_embed: discord.Embed
         self.poll_message: discord.Message
         self.res_message: discord.Message
         self.pools: dict[str, set[discord.Member]]
         self.voters: set[discord.Member]
+
+        logger.info(
+            f'A Poll instance is created for {chat_interaction.user.display_name}'
+        )
 
     @property
     def description(self):
@@ -227,6 +248,10 @@ class Poll:
         await self.chat_interaction.response.send_modal(self.modal)
 
     async def start(self) -> None:
+        logger.info(
+            f'{self.title} started | {join_str(self.description.values(), sep=" ")}'
+        )
+
         # start the poll
         self.poll_embed.timestamp = datetime.now()
         await self.modal_interaction.response.send_message(view=self.poll_view, embed=self.poll_embed)
@@ -236,6 +261,10 @@ class Poll:
         ...
 
     async def end(self):
+        logger.info(
+            f'{self.title} ended | {join_str(self.description.values(), sep=" ")}'
+        )
+
         # send poll result
         self.res_message = await self.poll_message.reply(embed=poll_result_embed(self))
 
@@ -246,5 +275,8 @@ class Poll:
             label='查看投票結果',
         ))
         self.poll_embed.title = f'***投票已結束 - {self.title}***'
-        # self.poll_embed.add_field(name='投票選項', value=options_str)
+        self.poll_embed.add_field(
+            name='投票選項',
+            value=join_str(*self.pools.keys(), sep='\n')
+        )
         await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
