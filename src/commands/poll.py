@@ -68,11 +68,12 @@ def poll_result_embed(poll):
             zero_field['value'] = 'None'
         else:
             zero_field['value'] = f'**{zero_pools[0]}**'
+        fields += [zero_field]
     elif len(zero_pools) > 1:
         zero_field['name'] += '選項'
         zero_field['value'] = join_str(zero_pools, sep='\n')
         zero_field['inline'] = False
-    fields += [zero_field]
+        fields += [zero_field]
 
     # show anonymous voters
     if not poll.is_public and len(zero_pools) < len(poll.pools):
@@ -93,7 +94,7 @@ class PollDetails(ui.Modal):
     form_title = ui.TextInput(
         label='投票標題',
         # placeholder='Poll Title',
-        default='Test Poll',
+        # default='Test Poll',
     )
 
     form_options = ui.TextInput(
@@ -140,7 +141,7 @@ class PollDetails(ui.Modal):
             # description=f'{self.poll.description["anonymity"]}{self.poll.description["format"]}\n限時{self.poll.duration}秒',
             description=join_str(
                 self.poll.description.values(),
-                sep='\n'
+                sep=' '
             ),
         )
         self.poll.poll_embed.set_footer(
@@ -178,7 +179,7 @@ class PollSelect(ui.Select):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         logger.info(
-            f'{self.poll.title} | {interaction.user.display_name} | {self.values}'
+            f'{self.poll.title} | {interaction.user.display_name} | {join_str(self.values, sep=", ")}'
         )
 
         self.poll.voters.add(interaction.user)
@@ -196,7 +197,10 @@ class PollSelect(ui.Select):
                 else:
                     pool.discard(interaction.user)
 
-        await interaction.response.send_message('Thanks for your vote!')
+        await interaction.response.send_message(
+            f'你投了 {join_str(self.values, sep=" ", bold=True)}',
+            ephemeral=True
+        )
 
 
 class PollView(ui.View):
@@ -261,12 +265,10 @@ class Poll:
         ...
 
     async def end(self):
-        logger.info(
-            f'{self.title} ended | {join_str(self.description.values(), sep=" ")}'
-        )
 
         # send poll result
         self.res_message = await self.poll_message.reply(embed=poll_result_embed(self))
+        logger.info(f'{self.title} | result embed generated')
 
         # edit poll message
         self.poll_view.clear_items().add_item(ui.Button(
@@ -274,9 +276,12 @@ class Poll:
             url=self.res_message.jump_url,
             label='查看投票結果',
         ))
+        logger.info(f'{self.title} | original view edited')
         self.poll_embed.title = f'***投票已結束 - {self.title}***'
         self.poll_embed.add_field(
             name='投票選項',
-            value=join_str(*self.pools.keys(), sep='\n')
+            value=join_str(self.pools.keys(), sep='\n')
         )
+        logger.info(f'{self.title} | original embed edited')
         await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
+        logger.info(f'{self.title} | ended')

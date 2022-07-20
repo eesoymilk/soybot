@@ -1,7 +1,7 @@
-from datetime import datetime
 import discord
 import asyncio
 
+from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
 from discord.app_commands import (
@@ -38,8 +38,8 @@ class SoyCommands(commands.Cog):
         await interaction.response.send_message(await starburst_stream())
 
     # Poll slash command
-    @app_commands.command(name="poll", description='預設設定：公開 單選 20秒')
-    # @describe(anonymity='公開 or 匿名', format='單選 or 複選', duration='投票持續秒數')
+    @app_commands.command(name="poll", description='發起投票吧！')
+    @describe(duration='預設為20秒')
     @rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
     @choices(
         anonymity=[
@@ -51,19 +51,20 @@ class SoyCommands(commands.Cog):
             Choice(name='複選', value='multiple'),
         ]
     )
-    @guilds(*Config.guild_ids)
+    @guilds(Config.guilds['debug'].id)
+    # @guilds(*Config.guild_ids)
     @guild_only()
     async def poll_coro(
         self,
         interaction: discord.Interaction,
-        anonymity: Choice[str] = 'public',
-        format: Choice[str] = 'single',
+        anonymity: Choice[str],
+        format: Choice[str],
         duration: Range[float, 10, 180] = 20.0
     ) -> None:
         settings = {
             'chat_interaction': interaction,
-            'is_public': anonymity == 'public',
-            'is_single': format == 'single',
+            'is_public': anonymity.value == 'public',
+            'is_single': format.value == 'single',
             'duration': duration
         }
         poll = Poll(**settings)
@@ -71,7 +72,10 @@ class SoyCommands(commands.Cog):
         if await poll.modal.wait():
             return
         await poll.start()
-        await asyncio.sleep(3)
+        self.logger.info('start timer')
+        await asyncio.sleep(poll.duration)
+        self.logger.info('call end function')
+        # await asyncio.sleep(3)
         await poll.end()
 
     # manually prefixed sync commands
