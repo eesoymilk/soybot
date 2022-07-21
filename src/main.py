@@ -2,8 +2,6 @@ import asyncio
 import discord
 import logging
 import logging.handlers
-from cogs import Listeners
-from cogs import SoyCommands
 from utils import Config
 from utils import get_lumberjack
 from eeSoybot import eeSoybot
@@ -18,17 +16,13 @@ bot = eeSoybot(
     owner_id=Config.users['soymilk'].id,
     test_guild=discord.Object(Config.guilds['debug'].id),
     nthu_guild=discord.Object(Config.guilds['nthu'].id),
-    command_prefix='?',
+    command_prefix='!',
     intents=discord.Intents.all(),
 )
 
 
 async def main():
     async with bot:
-        await asyncio.gather(
-            bot.add_cog(Listeners(bot)),
-            bot.add_cog(SoyCommands(bot)),
-        )
         await bot.start(Config.TOKEN)
 
 asyncio.run(main())

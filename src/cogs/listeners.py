@@ -97,4 +97,5 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        ...
+        if after.id == self.bot.user.id:
+            await after.edit(nick=None)

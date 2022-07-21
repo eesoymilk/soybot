@@ -9,6 +9,7 @@ load_dotenv()
 @dataclass(frozen=True)
 class Guild:
     id: int
+    bot_nick: str = None
     bot_roles: tuple[str] | None = None
 
 
@@ -28,12 +29,13 @@ class SoyReply():
 @dataclass(frozen=True)
 class User:
     id: int
-    soy_reply: SoyReply | None = None
-    soy_react: SoyReact | None = None
+    soy_reply: SoyReply = None
+    soy_react: SoyReact = None
 
 
 @dataclass(frozen=True)
 class Emoji:
+    # id if custom dc emoji, else str repr
     id: int | str
     tags: tuple[str]
 
@@ -41,7 +43,7 @@ class Emoji:
 class Config:
     TOKEN = os.environ.get('TOKEN')
 
-    guilds = {'nthu': Guild(id=771595191638687784,
+    guilds = {'nthu': Guild(id=771595191638687784, bot_nick=None,
                             bot_roles={771595191638687784, 771681968886251543, 771675662531428374, 955800304492871741}),
               'debug': Guild(id=874556062815100938)}
 
@@ -50,7 +52,7 @@ class Config:
     users = {
         'soymilk': User(
             id=202249480148353025,
-            soy_react=SoyReact(emoji_tags=('soymilk',),
+            soy_react=SoyReact(emoji_tags=('soymilk', 'pineapplebun'),
                                activation_probability=0.1)),
         'gay_dog': User(
             id=284350778087309312,
@@ -60,6 +62,10 @@ class Config:
             id=613683023300395029,
             soy_react=SoyReact(emoji_tags=('wtf',),
                                activation_probability=0.3)),
+        'ayu': User(
+            id=557591275227054090,
+            soy_react=SoyReact(emoji_tags=('gay',),
+                               activation_probability=0.4)),
         'snow': User(
             id=565862991061581835,
             soy_react=SoyReact(emoji_tags=('gay',),
@@ -83,7 +89,6 @@ class Config:
     }
 
     emojis = {
-        # 'wtf': Emoji(848135201439612978, ('wtf', 'soymilk')),
         'bulbasaur': Emoji(931022665790144542,
                            ('wtf', 'soymilk')),
         'detective_dog': Emoji(953983783995068436, ('angry', 'dog')),
@@ -131,25 +136,3 @@ class Config:
             result_emoji_ids += Config.emoji_ids_by_tag[t]
 
         return result_emoji_ids
-
-
-emojis = {
-    'angry_dog':
-        [953983783995068436,
-         946700998024515635,
-         991677468794703914,
-         991676465764638810,
-         991676443174129764,
-         991677470216552620,
-         991676592533295164],
-    'ayu': [994198292382634025, 989934658454183946],
-    'gay': [786891103722930206],
-    'fuck': [958223671779024950],
-    'heart': [955830885448564776, ],
-    'sad': [847493674664460329],
-    'feilin_set': [823469218648948746, 823469253923569686, 802139497567223808, 804392022172499999, 791299125114568764, '😀'],
-}
-
-keywords = {
-    'gay': ['甲', '阿玉', '阿欲', '阿郁', '阿衡', '阿雪', '雪夜', '紙袋', '袋袋', '阿袋', 'ayu'],
-}

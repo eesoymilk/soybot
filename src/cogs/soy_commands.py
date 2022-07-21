@@ -1,3 +1,4 @@
+from random import choice
 import discord
 import asyncio
 
@@ -32,7 +33,7 @@ class SoyCommands(commands.Cog):
 
     # Starburst Stream slash command
     @app_commands.command(name="starburst", description='C8763')
-    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
+    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     @guilds(*Config.guild_ids)
     async def starburst(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(await starburst_stream())
@@ -51,8 +52,8 @@ class SoyCommands(commands.Cog):
             Choice(name='複選', value='multiple'),
         ]
     )
-    @guilds(Config.guilds['debug'].id)
-    # @guilds(*Config.guild_ids)
+    # @guilds(Config.guilds['debug'].id)
+    @guilds(*Config.guild_ids)
     @guild_only()
     async def poll_coro(
         self,
@@ -78,14 +79,21 @@ class SoyCommands(commands.Cog):
         # await asyncio.sleep(3)
         await poll.end()
 
-    # manually prefixed sync commands
-    @commands.command(name="sync")
-    async def sync(self, ctx: commands.Context) -> None:
-        await ctx.send('commands syncing...')
-        await self.bot.tree.sync(guild=ctx.guild)
-        await ctx.send('commands synced.')
+    @app_commands.command(name='soy', description='用豆漿ㄐㄐ人說話ㄅ')
+    @rename(message='讓豆漿ㄐㄐ人講的話')
+    @guilds(*Config.guild_ids)
+    @guild_only()
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
+    async def echo(self, interaction: discord.Interaction, message: str):
+        self.logger.info(f'{interaction.user.display_name}: {message}')
+        await interaction.channel.send(message)
+        await interaction.response.send_message('已成功傳送', ephemeral=True)
 
     async def avatar_coro(self, interaction: discord.Interaction, target: discord.Member):
+        if target.id == self.bot.user.id:
+            await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人的頭貼好ㄇ', ephemeral=True)
+            return
+
         description = f'**{interaction.user.display_name}** 稽查了 **{target.display_name}** 的頭貼'
         if interaction.user.id == target.id:
             description = f'**{interaction.user.display_name}** 稽查了自己的頭貼'
@@ -100,22 +108,22 @@ class SoyCommands(commands.Cog):
             timestamp=datetime.now(),
         )
         embed.set_image(url=target.display_avatar.url)
-        await interaction.response.send_message(f'{target.mention} 的頭貼是 **伊織萌** {self.bot.get_emoji(780263339808522280)}', embed=embed)
+        await interaction.response.send_message(
+            f'{target.mention} 的頭貼是 **{choice(["伊織萌", "Saber"])}** {self.bot.get_emoji(780263339808522280)}',
+            embed=embed
+        )
 
     @app_commands.command(name="avatar", description='稽查頭貼')
     @rename(target='稽查對象')
     @guilds(*Config.guild_ids)
     @guild_only()
-    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
+    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_slash(self, interaction: discord.Interaction, target: discord.Member) -> None:
         await self.avatar_coro(interaction, target)
 
     @guilds(*Config.guild_ids)
-    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
+    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_ctx_menu(self, interaction: discord.Interaction, user: discord.Member):
-        if user.id == self.bot.user.id:
-            await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人的頭貼好ㄇ', ephemeral=True)
-            return
         await self.avatar_coro(interaction, target=user)
 
     async def on_app_command_error(self, interaction: discord.Interaction, error: AppCommandError):
