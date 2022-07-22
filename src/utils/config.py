@@ -91,9 +91,19 @@ class Config:
     emojis = {
         'bulbasaur': Emoji(931022665790144542,
                            ('wtf', 'soymilk')),
-        'detective_dog': Emoji(953983783995068436, ('angry', 'dog')),
-        'notangry_dog': Emoji(976082704275763210, ('sad', 'dog')),
-        'party_dog': Emoji(976082704275763210, ('party', 'dog')),
+
+        'angry_dog': Emoji(946700998024515635, ('angry', 'dog', 'dog_bundle')),
+        'sleeping_dog': Emoji(991677470216552620, ('angry', 'dog', 'dog_bundle', 'sleeping')),
+        'detective_dog': Emoji(953983783995068436, ('angry', 'dog', 'dog_bundle', 'detective')),
+        'notangry_dog': Emoji(976082704275763210, ('sad', 'dog', 'dog_bundle')),
+        'cowboy_dog': Emoji(991677468794703914, ('party', 'dog', 'dog_bundle')),
+        'starburst_dog': Emoji(991676592533295164, ('party', 'dog', 'dog_bundle')),
+        'rainbow_dog': Emoji(991676465764638810, ('a', 'party', 'dog', 'dog_bundle')),
+        'shaking_dog': Emoji(991676443174129764, ('a', 'shaking', 'party', 'dog', 'dog_bundle')),
+
+        'party_dog': Emoji(930768322226716672, ('party', 'dog', 'dog_bundle')),
+
+
         'gay_lao': Emoji(786891103722930206, ('gay', 'ayu', 'snow', 'paper')),
         'kekw': Emoji(778670717784293386, ('lol',)),
         'pineapplebun': Emoji(956009591374741575, ('pineapplebun',)),

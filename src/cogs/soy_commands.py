@@ -1,4 +1,5 @@
 from random import choice
+from urllib import response
 import discord
 import asyncio
 
@@ -27,6 +28,10 @@ class SoyCommands(commands.Cog):
             name='稽查頭貼',
             callback=self.avatar_ctx_menu,
         ))
+        bot.tree.add_command(app_commands.ContextMenu(
+            name='憤怒狗狗反應組合包',
+            callback=self.dog_reactions_bundle,
+        ))
 
         self.logger = get_lumberjack('SoyCommands', ANSI.BrightGreen)
         self.logger.info('initialized')
@@ -40,7 +45,7 @@ class SoyCommands(commands.Cog):
 
     # Poll slash command
     @app_commands.command(name="poll", description='發起投票吧！')
-    @describe(duration='預設為20秒')
+    @describe(duration='預設為20秒 (限制為10到180秒)')
     @rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
     @choices(
         anonymity=[
@@ -125,6 +130,18 @@ class SoyCommands(commands.Cog):
     @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_ctx_menu(self, interaction: discord.Interaction, user: discord.Member):
         await self.avatar_coro(interaction, target=user)
+
+    @guilds(*Config.guild_ids)
+    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
+    async def dog_reactions_bundle(self, interaction: discord.Interaction, message: discord.Message):
+        await interaction.response.send_message('**送出反應中...**', ephemeral=True)
+        # response = await interaction.original_message()
+        await asyncio.gather(*(
+            message.add_reaction(emoji)
+            for emoji in [self.bot.get_emoji(id)
+                          for id in Config.get_emoji_ids_by_tags('dog_bundle')]
+        ))
+        await interaction.message.edit('**憤怒狗狗反應套餐**已送出')
 
     async def on_app_command_error(self, interaction: discord.Interaction, error: AppCommandError):
         if isinstance(error, CommandOnCooldown):

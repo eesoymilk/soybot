@@ -89,6 +89,19 @@ def poll_result_embed(poll):
     return embed
 
 
+def validate_form(title: str, options: list[str]) -> list[str]:
+    errors = []
+    if not title:
+        errors.append('標題不能空白')
+    if len(options) < 2:
+        errors.append('選項數量至少要2項')
+    if len(options) > 25:
+        errors.append('選項數量不可超過25項')
+    if any(len(option) > 100 for option in options):
+        errors.append('單一選項的長度不得超過100字元')
+    return errors
+
+
 class PollDetails(ui.Modal):
 
     form_title = ui.TextInput(
@@ -97,8 +110,15 @@ class PollDetails(ui.Modal):
         # default='Test Poll',
     )
 
+    form_title = ui.TextInput(
+        label='投票說明',
+        placeholder='非必填',
+        required=False,
+        # default='Test Poll',
+    )
+
     form_options = ui.TextInput(
-        label='投票選項 (一個選項換一行)',
+        label='投票選項 (一選項換一行、選項數量需介於2至25之間、單一選項不得超過100字元)',
         style=discord.TextStyle.long,
         # placeholder='Poll Options',
         default='Yes\nNo',
@@ -122,14 +142,28 @@ class PollDetails(ui.Modal):
         )
 
         # setup poll details
+        self.poll.title = self.form_title.value.strip()
+        self.poll.options = []
+        option_set = set()
+        for option in self.form_options.value.split('\n'):
+            stripped = option.strip()
+            if stripped not in option_set:
+                option_set.add(stripped)
+                self.poll.options.append(stripped)
+        # self.poll.options = tuple(
+        #     opt.strip()
+        #     for opt in self.form_options.value.split('\n')
+        #     if opt.strip() and all()
+        # )
+        form_errors = validate_form(self.poll.title, self.poll.options)
+        if form_errors:
+            interaction.response.send_message(
+                join_str(form_errors, sep='\n', bold=True),
+                ephemeral=True
+            )
+            return
         self.poll.modal_interaction = interaction
         self.poll.color = discord.Color.random()
-        self.poll.title = self.form_title.value
-        self.poll.options = tuple({
-            option.strip()
-            for option in self.form_options.value.split('\n')
-            if option.strip()
-        })
         self.poll.pools = {option: set() for option in self.poll.options}
         self.poll.voters = set()
 
