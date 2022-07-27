@@ -1,7 +1,9 @@
 import asyncio
+from pathlib import Path
 import discord
 import logging
 import logging.handlers
+from discord.ext import commands
 from utils import Config
 from utils import get_lumberjack
 from eeSoybot import eeSoybot
@@ -16,12 +18,17 @@ bot = eeSoybot(
     owner_id=Config.users['soymilk'].id,
     test_guild=discord.Object(Config.guilds['debug'].id),
     nthu_guild=discord.Object(Config.guilds['nthu'].id),
+    my_guild=discord.Object(Config.guilds['trap_lovers'].id),
     command_prefix='!',
     intents=discord.Intents.all(),
 )
 
 
 async def main():
+    exts = [f'extensions.{p.stem}'
+            for p in Path('./src/extensions').glob('*.py')
+            if p.stem != '__init__']
+    await asyncio.gather(*[bot.load_extension(ext) for ext in exts])
     async with bot:
         await bot.start(Config.TOKEN)
 

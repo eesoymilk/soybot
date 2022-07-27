@@ -45,7 +45,9 @@ class Config:
 
     guilds = {'nthu': Guild(id=771595191638687784, bot_nick=None,
                             bot_roles={771595191638687784, 771681968886251543, 771675662531428374, 955800304492871741}),
-              'debug': Guild(id=874556062815100938)}
+              'debug': Guild(id=874556062815100938),
+              'trap_lovers': Guild(id=202599307755388929),
+              }
 
     guild_ids = tuple(guild.id for guild in guilds.values())
 

@@ -293,7 +293,7 @@ class Poll:
         # start the poll
         self.poll_embed.timestamp = datetime.now()
         await self.modal_interaction.response.send_message(view=self.poll_view, embed=self.poll_embed)
-        self.poll_message = await self.modal_interaction.original_message()
+        # self.poll_message = await self.modal_interaction.original_message()
 
         # TODO queue if multiple polls
         ...
@@ -302,7 +302,7 @@ class Poll:
 
         # send poll result
         self.res_message = await self.poll_message.reply(embed=poll_result_embed(self))
-        logger.info(f'{self.title} | result embed generated')
+        logger.debug(f'{self.title} | result embed generated')
 
         # edit poll message
         self.poll_view.clear_items().add_item(ui.Button(
@@ -310,12 +310,12 @@ class Poll:
             url=self.res_message.jump_url,
             label='查看投票結果',
         ))
-        logger.info(f'{self.title} | original view edited')
+        logger.debug(f'{self.title} | original view edited')
         self.poll_embed.title = f'***投票已結束 - {self.title}***'
         self.poll_embed.add_field(
             name='投票選項',
             value=join_str(self.pools.keys(), sep='\n')
         )
-        logger.info(f'{self.title} | original embed edited')
-        await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
+        # logger.debug(f'{self.title} | original embed edited')
+        # await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
         logger.info(f'{self.title} | ended')

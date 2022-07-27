@@ -99,3 +99,7 @@ class Listeners(commands.Cog):
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if after.id == self.bot.user.id:
             await after.edit(nick=None)
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Listeners(bot))
