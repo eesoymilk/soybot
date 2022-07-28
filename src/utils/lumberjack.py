@@ -1,6 +1,8 @@
 import logging
 import re
 
+loggers_log: set[str] = set()
+
 
 class ANSI:
     # text colors
@@ -89,8 +91,18 @@ class RichLoggingFormat(logging.Formatter):
         return super().format(record)
 
 
-def get_lumberjack(name: str, name_color=ANSI.BrightBlue, file_level=logging.DEBUG, console_level=logging.INFO) -> logging.Logger:
+def get_lumberjack(
+        name: str,
+        name_color=ANSI.BrightBlue,
+        file_level=logging.DEBUG,
+        console_level=logging.INFO
+) -> logging.Logger:
     logger = logging.getLogger(name)
+
+    if name in loggers_log:
+        return logger
+
+    loggers_log.add(name)
     logger.setLevel(file_level)
 
     # console handler

@@ -10,7 +10,7 @@ load_dotenv()
 class Guild:
     id: int
     bot_nick: str = None
-    bot_roles: tuple[str] | None = None
+    bot_roles: tuple[str]  = None
 
 
 @dataclass(frozen=True)

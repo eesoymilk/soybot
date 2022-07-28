@@ -1,7 +1,17 @@
-import discord
-from discord import ui
-from utils import get_lumberjack
 from datetime import datetime
+from discord import ui
+import discord
+import asyncio
+
+from discord import app_commands
+from discord.ext import commands
+from discord.app_commands import (
+    guilds, describe, rename, choices, guild_only,
+    Choice, Range,
+)
+# from commands import Poll
+from utils import Config
+from utils import get_lumberjack
 
 logger = get_lumberjack('Poll')
 
@@ -319,3 +329,46 @@ class Poll:
         # logger.debug(f'{self.title} | original embed edited')
         await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
         logger.info(f'{self.title} | ended')
+
+
+@app_commands.command(name="poll", description='發起投票吧！')
+@describe(duration='預設為20秒 (限制為10到180秒)')
+@rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
+@choices(
+    anonymity=[
+        Choice(name='公開', value='public'),
+        Choice(name='匿名', value='anonymous'),
+    ],
+    format=[
+        Choice(name='單選', value='single'),
+        Choice(name='複選', value='multiple'),
+    ]
+)
+# @guilds(Config.guilds['debug'].id)
+@guilds(*Config.guild_ids)
+@guild_only()
+async def poll_command(
+    interaction: discord.Interaction,
+    anonymity: Choice[str],
+    format: Choice[str],
+    duration: Range[float, 10, 180] = 20.0
+) -> None:
+    settings = {
+        'chat_interaction': interaction,
+        'is_public': anonymity.value == 'public',
+        'is_single': format.value == 'single',
+        'duration': duration
+    }
+    poll = Poll(**settings)
+    await poll.prompt_details()
+    if await poll.modal.wait():
+        return
+    await poll.start()
+    logger.debug('start timer')
+    await asyncio.sleep(poll.duration)
+    logger.debug('call end function')
+    await poll.end()
+
+
+async def setup(bot: commands.Bot) -> None:
+    bot.tree.add_command(poll_command)

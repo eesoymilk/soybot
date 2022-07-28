@@ -47,7 +47,7 @@ class SoyCommands(commands.Cog):
             callback=self.avatar_ctx_menu,
         ))
         bot.tree.add_command(app_commands.ContextMenu(
-            name='憤怒狗狗反應組合包',
+            name='憤怒狗狗反應套餐',
             callback=self.dog_reactions,
         ))
 
@@ -61,46 +61,46 @@ class SoyCommands(commands.Cog):
     async def starburst(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(await starburst_stream())
 
-    # Poll slash command
-    @app_commands.command(name="poll", description='發起投票吧！')
-    @describe(duration='預設為20秒 (限制為10到180秒)')
-    @rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
-    @choices(
-        anonymity=[
-            Choice(name='公開', value='public'),
-            Choice(name='匿名', value='anonymous'),
-        ],
-        format=[
-            Choice(name='單選', value='single'),
-            Choice(name='複選', value='multiple'),
-        ]
-    )
-    @guilds(Config.guilds['debug'].id)
-    # @guilds(*Config.guild_ids)
-    @guild_only()
-    async def poll_coro(
-        self,
-        interaction: discord.Interaction,
-        anonymity: Choice[str],
-        format: Choice[str],
-        duration: Range[float, 10, 180] = 20.0
-    ) -> None:
-        settings = {
-            'chat_interaction': interaction,
-            'is_public': anonymity.value == 'public',
-            'is_single': format.value == 'single',
-            'duration': duration
-        }
-        poll = Poll(**settings)
-        await poll.prompt_details()
-        if await poll.modal.wait():
-            return
-        await poll.start()
-        self.logger.info('start timer')
-        await asyncio.sleep(poll.duration)
-        self.logger.info('call end function')
-        # await asyncio.sleep(3)
-        await poll.end()
+    # # Poll slash command
+    # @app_commands.command(name="poll", description='發起投票吧！')
+    # @describe(duration='預設為20秒 (限制為10到180秒)')
+    # @rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
+    # @choices(
+    #     anonymity=[
+    #         Choice(name='公開', value='public'),
+    #         Choice(name='匿名', value='anonymous'),
+    #     ],
+    #     format=[
+    #         Choice(name='單選', value='single'),
+    #         Choice(name='複選', value='multiple'),
+    #     ]
+    # )
+    # @guilds(Config.guilds['debug'].id)
+    # # @guilds(*Config.guild_ids)
+    # @guild_only()
+    # async def poll_coro(
+    #     self,
+    #     interaction: discord.Interaction,
+    #     anonymity: Choice[str],
+    #     format: Choice[str],
+    #     duration: Range[float, 10, 180] = 20.0
+    # ) -> None:
+    #     settings = {
+    #         'chat_interaction': interaction,
+    #         'is_public': anonymity.value == 'public',
+    #         'is_single': format.value == 'single',
+    #         'duration': duration
+    #     }
+    #     poll = Poll(**settings)
+    #     await poll.prompt_details()
+    #     if await poll.modal.wait():
+    #         return
+    #     await poll.start()
+    #     self.logger.info('start timer')
+    #     await asyncio.sleep(poll.duration)
+    #     self.logger.info('call end function')
+    #     # await asyncio.sleep(3)
+    #     await poll.end()
 
     @app_commands.command(name='soy', description='用豆漿ㄐㄐ人說話ㄅ')
     @rename(message='讓豆漿ㄐㄐ人講的話')
@@ -166,7 +166,7 @@ class SoyCommands(commands.Cog):
             for emoji in [self.bot.get_emoji(id)
                           for id in Config.get_emoji_ids_by_tags('dog_bundle')]
         ))
-        await interaction.edit_original_message('**憤怒狗狗反應套餐**已送出')
+        await interaction.edit_original_message(content='**憤怒狗狗反應套餐**已送出')
 
     async def on_app_command_error(self, interaction: discord.Interaction, error: AppCommandError):
         if isinstance(error, CommandOnCooldown):
