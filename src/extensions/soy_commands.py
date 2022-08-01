@@ -10,7 +10,6 @@ from discord.app_commands import (
     Choice, Range,
     AppCommandError, CommandOnCooldown
 )
-from commands import Poll
 from commands import starburst_stream
 from utils import ANSI
 from utils import Config
@@ -61,47 +60,6 @@ class SoyCommands(commands.Cog):
     async def starburst(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(await starburst_stream())
 
-    # # Poll slash command
-    # @app_commands.command(name="poll", description='發起投票吧！')
-    # @describe(duration='預設為20秒 (限制為10到180秒)')
-    # @rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
-    # @choices(
-    #     anonymity=[
-    #         Choice(name='公開', value='public'),
-    #         Choice(name='匿名', value='anonymous'),
-    #     ],
-    #     format=[
-    #         Choice(name='單選', value='single'),
-    #         Choice(name='複選', value='multiple'),
-    #     ]
-    # )
-    # @guilds(Config.guilds['debug'].id)
-    # # @guilds(*Config.guild_ids)
-    # @guild_only()
-    # async def poll_coro(
-    #     self,
-    #     interaction: discord.Interaction,
-    #     anonymity: Choice[str],
-    #     format: Choice[str],
-    #     duration: Range[float, 10, 180] = 20.0
-    # ) -> None:
-    #     settings = {
-    #         'chat_interaction': interaction,
-    #         'is_public': anonymity.value == 'public',
-    #         'is_single': format.value == 'single',
-    #         'duration': duration
-    #     }
-    #     poll = Poll(**settings)
-    #     await poll.prompt_details()
-    #     if await poll.modal.wait():
-    #         return
-    #     await poll.start()
-    #     self.logger.info('start timer')
-    #     await asyncio.sleep(poll.duration)
-    #     self.logger.info('call end function')
-    #     # await asyncio.sleep(3)
-    #     await poll.end()
-
     @app_commands.command(name='soy', description='用豆漿ㄐㄐ人說話ㄅ')
     @rename(message='讓豆漿ㄐㄐ人講的話')
     @guilds(*Config.guild_ids)
@@ -121,13 +79,10 @@ class SoyCommands(commands.Cog):
         if interaction.user.id == target.id:
             description = f'**{interaction.user.display_name}** 稽查了自己的頭貼'
 
-        color = target.color
-
         embed = discord.Embed(
-            color=color,
+            color=target.color,
             description=description,
             type='image',
-            # url='user.display_avatar.url',
             timestamp=datetime.now(),
         )
         embed.set_image(url=target.display_avatar.url)
@@ -160,7 +115,6 @@ class SoyCommands(commands.Cog):
         }
         await interaction.response.send_message('**送出反應中...**', ephemeral=True)
         self.logger.info(rich_logging_formatter(**log_details))
-        # response = await interaction.original_message()
         await asyncio.gather(*(
             message.add_reaction(emoji)
             for emoji in [self.bot.get_emoji(id)

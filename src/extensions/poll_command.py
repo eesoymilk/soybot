@@ -1,15 +1,14 @@
-from datetime import datetime
-from discord import ui
 import discord
 import asyncio
 
+from discord import ui
 from discord import app_commands
 from discord.ext import commands
 from discord.app_commands import (
     guilds, describe, rename, choices, guild_only,
     Choice, Range,
 )
-# from commands import Poll
+from datetime import datetime
 from utils import Config
 from utils import get_lumberjack
 
@@ -145,7 +144,7 @@ class PollDetails(ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         # defer the response so that it can be called in poll.start()
-        # await interaction.response.defer()
+        await interaction.response.defer()
 
         logger.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Modal received.'
@@ -160,11 +159,6 @@ class PollDetails(ui.Modal):
             if stripped not in option_set:
                 option_set.add(stripped)
                 self.poll.options.append(stripped)
-        # self.poll.options = tuple(
-        #     opt.strip()
-        #     for opt in self.form_options.value.split('\n')
-        #     if opt.strip() and all()
-        # )
         form_errors = validate_form(self.poll.title, self.poll.options)
         if form_errors:
             interaction.response.send_message(
@@ -196,7 +190,6 @@ class PollDetails(ui.Modal):
         logger.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Poll is ready.'
         )
-
         # stop the view so that the coro proceed
         self.stop()
 
