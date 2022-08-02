@@ -1,5 +1,6 @@
 import asyncio
 from pathlib import Path
+import discord
 from discord.ext import commands
 from utils import Config
 
@@ -28,11 +29,17 @@ async def reload(ctx: commands.Context, extension: str = None):
         await ctx.bot.reload_extension(f'extensions.{extension}')
     else:
         exts = [f'extensions.{p.stem}'
-                for p in Path('./src/extensions').glob('*.py')
-                if p.stem not in ('__init__', 'utilities')]
+                for p in Path('./src/extensions').glob('*.py')]
         await asyncio.gather(*[ctx.bot.reload_extension(ext) for ext in exts])
+
+
+@commands.command()
+async def test(ctx: commands.Context):
+    await ctx.send(discord.Object(771595191638687784))
+    await ctx.message.add_reaction(discord.Object(771595191638687784))
 
 
 async def setup(bot: commands.Bot):
     bot.add_command(sync)
     bot.add_command(reload)
+    bot.add_command(test)

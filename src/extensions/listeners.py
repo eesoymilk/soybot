@@ -80,8 +80,11 @@ class Listeners(commands.Cog):
             if user.display_name != reaction.message.author.display_name else None,
             'emoji': reaction.emoji,
         }
-
         self.logger.info(rich_logging_formatter(**log_details))
+
+        # if reaction.count > 1 and self.bot.user.id not in [user.id async for user in reaction.users()]:
+        if reaction.count > 1:
+            await reaction.message.add_reaction(reaction)
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
