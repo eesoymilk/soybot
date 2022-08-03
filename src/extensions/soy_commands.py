@@ -70,7 +70,7 @@ class SoyCommands(commands.Cog):
         await interaction.channel.send(message)
         await interaction.response.send_message('已成功傳送', ephemeral=True)
 
-    async def avatar_coro(self, interaction: discord.Interaction, target: discord.Member):
+    async def avatar(self, interaction: discord.Interaction, target: discord.Member):
         if target.id == self.bot.user.id:
             await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人的頭貼好ㄇ', ephemeral=True)
             return
@@ -91,18 +91,26 @@ class SoyCommands(commands.Cog):
             embed=embed
         )
 
+        log_details = {
+            'guild': interaction.guild.name,
+            'channel': interaction.channel.name,
+            'display_name': interaction.user.display_name,
+            'receiver': target.display_name,
+        }
+        self.logger.info(rich_logging_formatter(**log_details))
+
     @app_commands.command(name="avatar", description='稽查頭貼')
     @rename(target='稽查對象')
     @guilds(*Config.guild_ids)
     @guild_only()
     @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_slash(self, interaction: discord.Interaction, target: discord.Member) -> None:
-        await self.avatar_coro(interaction, target)
+        await self.avatar(interaction, target)
 
     @guilds(*Config.guild_ids)
     @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
     async def avatar_ctx_menu(self, interaction: discord.Interaction, user: discord.Member):
-        await self.avatar_coro(interaction, target=user)
+        await self.avatar(interaction, target=user)
 
     @guilds(*Config.guild_ids)
     @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))

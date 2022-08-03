@@ -83,12 +83,20 @@ class Listeners(commands.Cog):
         self.logger.info(rich_logging_formatter(**log_details))
 
         # if reaction.count > 1 and self.bot.user.id not in [user.id async for user in reaction.users()]:
-        if reaction.count > 1:
+        if reaction.count > 2:
             await reaction.message.add_reaction(reaction)
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
-        ...
+        log_details = {
+            'guild': reaction.message.guild.name,
+            'channel': reaction.message.channel.name,
+            'display_name': user.display_name,
+            'receiver': reaction.message.author.display_name
+            if user.display_name != reaction.message.author.display_name else None,
+            'emoji': reaction.emoji,
+        }
+        self.logger.info(rich_logging_formatter(**log_details))
 
     @commands.Cog.listener()
     async def on_typing(self, channel: discord.abc.Messageable, user: discord.Member, when: datetime):
