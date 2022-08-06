@@ -112,7 +112,7 @@ def get_lumberjack(
 
     # file handler
     fh = logging.handlers.RotatingFileHandler(
-        filename=f'logs\\{name}.log',
+        filename=f'logs/{name}.log',
         maxBytes=32 * 1024 * 1024,  # 32 MiB
         backupCount=5,  # Rotate through 5 files
         encoding='utf-8',
