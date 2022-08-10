@@ -98,6 +98,9 @@ class Listeners(commands.Cog):
         }
         self.logger.info(rich_logging_formatter(**log_details))
 
+        if user.id == self.bot.user.id and reaction.message.guild.id == Config.guilds['nthu'].id:
+            await reaction.message.add_reaction(reaction)
+
     @commands.Cog.listener()
     async def on_typing(self, channel: discord.abc.Messageable, user: discord.Member, when: datetime):
         ...

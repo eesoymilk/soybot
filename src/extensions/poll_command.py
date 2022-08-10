@@ -143,9 +143,6 @@ class PollDetails(ui.Modal):
         )
 
     async def on_submit(self, interaction: discord.Interaction):
-        # defer the response so that it can be called in poll.start()
-        await interaction.response.defer()
-
         logger.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Modal received.'
         )
