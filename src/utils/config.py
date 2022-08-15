@@ -114,6 +114,7 @@ class Config:
         'fubuki': Emoji(823469218648948746, ('feilin',)),
         'miko': Emoji(823469253923569686, ('feilin',)),
         'pekora': Emoji(802139497567223808, ('feilin',)),
+        'watson_eat_sand': Emoji(793809340997828609, ('feilin',)),
 
         'joy': Emoji('😂', ('lol')),
         'nauseated_face': Emoji('🤢', ('gay_dog', 'disgusted')),
