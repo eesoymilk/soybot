@@ -1,15 +1,13 @@
-from datetime import datetime
 import discord
 import aiohttp
 from urllib.parse import urljoin
-from discord import app_commands
-from discord.app_commands import (
-    guilds, guild_only, Choice, choices, rename, describe)
+from discord import app_commands as ac
+from discord.app_commands import Choice
 from discord.ext import commands
+from datetime import datetime
 from utils import Config
 
 waifu_pics_url = 'https://api.waifu.pics'
-
 categories = {
     'sfw': {
         '貓娘': 'neko',
@@ -22,15 +20,10 @@ categories = {
         '舔舔': 'lick',
         '摸摸': 'pat',
         '傲嬌': 'smug',
-        'BONK': 'bonk',
         'YEET': 'yeet',
         '臉紅': 'blush',
-        '微笑': 'smile',
-        '揮手': 'wave',
-        '牽手': 'handhold',
         '好ㄘ': 'nom',
         '咬': 'bite',
-        'SLAP': 'slap',
         '踢人': 'kick',
         '開心': 'happy',
         '眨眼': 'wink',
@@ -44,16 +37,13 @@ categories = {
 }
 
 
-@app_commands.command(description='你老婆真好用...')
-@describe(category='你今天要哪種老婆')
-@rename(category='老婆類型')
-@choices(
-    category=[Choice(name=k, value=v) for k, v in categories['sfw'].items()],
-)
-# @guilds(Config.guilds['debug'].id)
-@guilds(*Config.guild_ids)
-@guild_only()
-@app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
+@ac.command(description='你老婆真好用...')
+@ac.describe(category='你今天要哪種老婆')
+@ac.rename(category='老婆類型')
+@ac.choices(category=[Choice(name=k, value=v) for k, v in categories['sfw'].items()],)
+# @ac.guilds(Config.guilds['debug'].id)
+@ac.guilds(*Config.guild_ids)
+@ac.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
 async def waifu(interaction: discord.Interaction, category: Choice[str] = None):
     async with aiohttp.ClientSession() as session:
         if category is None:
@@ -75,15 +65,12 @@ async def waifu(interaction: discord.Interaction, category: Choice[str] = None):
                 await interaction.response.send_message('醒 你沒老婆')
 
 
-@app_commands.command(description='可以色色...', nsfw=True)
-@describe(category='你今天想要哪種色色')
-@rename(category='色色類型')
-@choices(
-    category=[Choice(name=k, value=v) for k, v in categories['nsfw'].items()],
-)
-# @guilds(Config.guilds['debug'].id)
-@guilds(*Config.guild_ids)
-@guild_only()
+@ac.command(description='可以色色...', nsfw=True)
+@ac.describe(category='你今天想要哪種色色')
+@ac.rename(category='色色類型')
+@ac.choices(category=[Choice(name=k, value=v) for k, v in categories['nsfw'].items()])
+# @ac.guilds(Config.guilds['debug'].id)
+@ac.guilds(*Config.guild_ids)
 async def horny(interaction: discord.Interaction, category: Choice[str] = None):
     async with aiohttp.ClientSession() as session:
         if category is None:

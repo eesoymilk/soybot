@@ -3,7 +3,6 @@ from pathlib import Path
 import discord
 import logging
 import logging.handlers
-from discord.ext import commands
 from utils import Config
 from utils import get_lumberjack
 from eeSoybot import eeSoybot
