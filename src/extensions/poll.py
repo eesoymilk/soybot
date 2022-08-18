@@ -177,8 +177,7 @@ class PollDetails(ui.Modal):
                 self.poll.description.values(),
                 sep=' '
             ),
-        )
-        self.poll.poll_embed.set_footer(
+        ).set_footer(
             text=f'由 {interaction.user.display_name} 發起',
             icon_url=interaction.user.display_avatar.url
         )
@@ -292,7 +291,7 @@ class Poll:
         # start the poll
         self.poll_embed.timestamp = datetime.now()
         await self.modal_interaction.response.send_message(view=self.poll_view, embed=self.poll_embed)
-        self.poll_message = await self.modal_interaction.original_message()
+        self.poll_message = await self.modal_interaction.original_response()
 
         # TODO queue if multiple polls
         ...
