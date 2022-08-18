@@ -33,25 +33,32 @@ async def avatar(interaction: discord.Interaction, target: discord.Member):
         await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人好ㄇ', ephemeral=True)
         return
 
-    message = f'{interaction.user.mention} 稽查了{f" {target.mention}" if interaction.user.id != target.id else "自己"}'
+    await interaction.response.defer()
+
+    message = f'**{interaction.user.display_name}** 稽查了{f" {target.mention}" if interaction.user.id != target.id else "自己"}'
     embed = Embed(
         description=target.nick if target.nick is not None else None,
         color=target.color,
         timestamp=target.joined_at,
-    )
-    embed.set_author(
+    ).set_author(
         name=target,
         icon_url=target.avatar,
+    ).set_footer(
+        text=f'加入 {interaction.guild.name}',
+        icon_url=interaction.guild.icon,
     )
-    embed.set_footer(text=f'加入 {interaction.guild.name}')
+
     fetched_target = await interaction.client.fetch_user(target.id)
     if fetched_target.banner is not None:
-        embed.set_thumbnail(url=target.display_avatar)
-        embed.set_image(url=fetched_target.banner)
+        embed.set_thumbnail(
+            url=target.display_avatar
+        ).set_image(
+            url=fetched_target.banner
+        )
     else:
         embed.set_image(url=target.display_avatar)
 
-    await interaction.response.send_message(message, embed=embed)
+    await interaction.followup.send(message, embed=embed)
 
     log_details = {
         'guild': interaction.guild.name,

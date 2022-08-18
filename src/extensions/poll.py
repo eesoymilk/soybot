@@ -32,8 +32,7 @@ def poll_result_embed(poll):
         title=f'投票結果 - **{poll.title}**',
         description=join_str(list(poll.description.values())[:-1]),
         timestamp=datetime.now(),
-    )
-    embed.set_footer(
+    ).set_footer(
         text=f'由 {poll.chat_interaction.user.display_name} 發起',
         icon_url=poll.chat_interaction.user.display_avatar.url
     )
@@ -119,7 +118,7 @@ class PollDetails(ui.Modal):
         # default='Test Poll',
     )
 
-    form_title = ui.TextInput(
+    form_description = ui.TextInput(
         label='投票說明',
         placeholder='非必填',
         required=False,
