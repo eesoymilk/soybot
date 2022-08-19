@@ -10,7 +10,7 @@ load_dotenv()
 class Guild:
     id: int
     bot_nick: str = None
-    bot_roles: tuple[str]  = None
+    bot_roles: tuple[str] = None
 
 
 @dataclass(frozen=True)
@@ -84,6 +84,10 @@ class Config:
             id=777196949903376396,
             soy_react=SoyReact(emoji_tags=('pineapplebun',),
                                activation_probability=0.3)),
+        'dodo': User(
+            id=618679878144753664,
+            soy_react=SoyReact(emoji_tags=('dodo',),
+                               activation_probability=0.3)),
         # 'carl_bot': User(
         #     id=235148962103951360,
         #     soy_react=SoyReact(emoji_tags=('gay',),
@@ -120,7 +124,9 @@ class Config:
         'nauseated_face': Emoji('🤢', ('gay_dog', 'disgusted')),
         'face_vomitting': Emoji('🤮', ('gay_dog', 'disgusted')),
         'partying_face': Emoji('🥳', ('party',)),
-        'grinning': Emoji('😀', ('feilin',))
+        'grinning': Emoji('😀', ('feilin',)),
+
+        'flushed_face': Emoji('😳', ('dodo',)),
     }
 
     emoji_ids_by_tag = {}

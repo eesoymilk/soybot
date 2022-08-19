@@ -41,14 +41,14 @@ async def angry_dog_reactions(interaction: discord.Interaction, message: discord
         'display_name': interaction.user.display_name,
         'receiver': message.author.display_name,
     }
-    await interaction.response.send_message('**送出反應中...**', ephemeral=True)
+    await interaction.response.defer(ephemeral=True, thinking=True)
     logger.info(rich_logging_formatter(**log_details))
     await asyncio.gather(*(
         message.add_reaction(emoji)
         for emoji in [interaction.client.get_emoji(id)
                       for id in Config.get_emoji_ids_by_tags('dog_bundle')]
     ))
-    await interaction.edit_original_message(content='**憤怒狗狗**已送出')
+    await interaction.followup.send(content='**憤怒狗狗**已送出')
 
 
 async def setup(bot: commands.Bot):

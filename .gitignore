@@ -1,6 +1,9 @@
 # logs
 logs/
 
+# debugging files
+*_debug.py
+
 # .vscode
 .vscode/
 

@@ -35,9 +35,10 @@ async def avatar(interaction: discord.Interaction, target: discord.Member):
 
     await interaction.response.defer()
 
-    message = f'**{interaction.user.display_name}** 稽查了{f" {target.mention}" if interaction.user.id != target.id else "自己"}'
+    description = f'**{interaction.user.display_name}**稽查了{f"{target.mention}" if interaction.user.id != target.id else "自己"}'
     embed = Embed(
-        description=target.nick if target.nick is not None else None,
+        description=description,
+        # description=target.nick if target.nick is not None else None,
         color=target.color,
         timestamp=target.joined_at,
     ).set_author(
@@ -58,7 +59,7 @@ async def avatar(interaction: discord.Interaction, target: discord.Member):
     else:
         embed.set_image(url=target.display_avatar)
 
-    await interaction.followup.send(message, embed=embed)
+    await interaction.followup.send(embed=embed)
 
     log_details = {
         'guild': interaction.guild.name,

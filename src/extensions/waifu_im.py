@@ -128,5 +128,6 @@ async def waifu(interaction: Interaction, tag: Choice[str] = None):
 
 
 async def setup(bot: commands.Bot) -> None:
-    bot.tree.add_command(waifu)
+    # bot.tree.add_command(waifu)
     # bot.tree.add_command(horny)
+    ...
