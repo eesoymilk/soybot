@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from textwrap import dedent
 import discord
 import asyncio
 
-from discord import app_commands as ac, Message
+from discord import app_commands as ac, Message, Member
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot
 from utils import NTHU, ANSI, Config, get_lumberjack
@@ -72,6 +73,14 @@ class NthuCog(Cog):
         self._streaks: dict[int, MessageStreak] = dict()
 
     @commands.Cog.listener()
+    async def on_member_join(self, mem: Member) -> None:
+        await mem.guild.system_channel.send(dedent(f'''\
+            歡迎{mem.mention}加入**{mem.guild.name}**！
+
+            請至{mem.guild.get_channel(NTHU.intro_channel_id).mention}留下您的系級和簡短的自我介紹，
+            讓我們更加認識你/妳喔！'''))
+
+    @commands.Cog.listener()
     async def on_message(self, msg: Message):
         # ignore own message and bots
         if msg.author.id == self.bot.user.id or msg.author.bot:
@@ -133,5 +142,8 @@ class NthuCog(Cog):
 
 async def setup(bot: Bot):
     bot.tree.add_command(angry_dog_reactions)
-    await bot.add_cog(NthuCog(bot))
+    await bot.add_cog(
+        NthuCog(bot),
+        guild=discord.Object(NTHU.guild_id)
+    )
     logger.info('loaded')

@@ -42,6 +42,7 @@ class Emoji:
 class NTHU:
 
     guild_id = 771595191638687784
+    intro_channel_id = 771705163177000960
 
     users = {
         'soymilk': User(
