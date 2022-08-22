@@ -1,9 +1,15 @@
-import os
 from dotenv import load_dotenv
 from dataclasses import dataclass
 
 
 load_dotenv()
+
+
+@dataclass(frozen=True)
+class Guild:
+    id: int
+    bot_nick: str = None
+    bot_roles: tuple[str] = None
 
 
 @dataclass(frozen=True)
@@ -33,16 +39,9 @@ class Emoji:
     tags: tuple[str]
 
 
-class Config:
-    TOKEN = os.environ.get('TOKEN')
+class NTHU:
 
-    guilds = {
-        'nthu': 771595191638687784,
-        'debug': 874556062815100938,
-        'trap_lovers': 202599307755388929,
-    }
-
-    guild_ids = [id for id in guilds.values()]
+    guild_id = 771595191638687784
 
     users = {
         'soymilk': User(
@@ -125,22 +124,22 @@ class Config:
     #      '阿袋', 'ayu'), (SoyReact(0.3, 1, ['gay']))),
     # )
 
-    @staticmethod
-    def get_action_by_user_id(id: int) -> tuple[SoyReact | None, SoyReply | None] | None:
-        return next(
-            ((u.soy_react, u.soy_reply)
-             for u in Config.users.values() if id == u.id), (None, None)
-        )
 
-    @staticmethod
-    def get_emoji_ids_by_tags(*tags):
-        result_emoji_ids = []
+def get_action_by_user_id(id: int) -> tuple[SoyReact | None, SoyReply | None] | None:
+    return next(
+        ((u.soy_react, u.soy_reply)
+            for u in NTHU.users.values() if id == u.id), (None, None)
+    )
 
-        for t in tags:
-            if t not in Config.emoji_ids_by_tag:
-                Config.emoji_ids_by_tag[t] = [
-                    e.id for e in Config.emojis.values() if t in e.tags
-                ]
-            result_emoji_ids += Config.emoji_ids_by_tag[t]
 
-        return result_emoji_ids
+def get_emoji_ids_by_tags(*tags):
+    result_emoji_ids = []
+
+    for t in tags:
+        if t not in NTHU.emoji_ids_by_tag:
+            NTHU.emoji_ids_by_tag[t] = [
+                e.id for e in NTHU.emojis.values() if t in e.tags
+            ]
+        result_emoji_ids += NTHU.emoji_ids_by_tag[t]
+
+    return result_emoji_ids

@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
 from utils import Config
 
 soyid = Config.users['soymilk'].id
@@ -9,7 +10,7 @@ soyid = Config.users['soymilk'].id
 
 # sync to all guilds in config.py
 @commands.command()
-async def sync(ctx: commands.Context):
+async def sync(ctx: Context):
     if ctx.author.id != soyid:
         return
     await asyncio.gather(*[
@@ -22,15 +23,17 @@ async def sync(ctx: commands.Context):
 
 # reload extension
 @commands.command()
-async def reload(ctx: commands.Context, extension: str = None):
+async def reload(ctx: Context, query: str = None):
     if ctx.author.id != soyid:
         return
-    if extension is not None:
-        await ctx.bot.reload_extension(f'extensions.{extension}')
-    else:
-        exts = [f'extensions.{p.stem}'
-                for p in Path('./src/extensions').glob('*.py')]
-        await asyncio.gather(*[ctx.bot.reload_extension(ext) for ext in exts])
+
+    exts = [p.stem for p in Path('./src/extensions').glob('*.py')]
+    if query is not None:
+        exts = list(filter(lambda ext: query in ext, exts))
+    await asyncio.gather(*[
+        ctx.bot.reload_extension(f'extensions.{ext}') for ext in exts
+    ])
+    await ctx.send(f'**{", ".join(exts)}** reloaded')
 
 
 @commands.command()

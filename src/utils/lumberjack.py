@@ -91,6 +91,23 @@ class RichLoggingFormat(logging.Formatter):
         return super().format(record)
 
 
+def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
+    log_msg = ''
+
+    if guild is not None:
+        log_msg += f'{ANSI.BackgroundWhite}{ANSI.BrightBlack}{guild}{ANSI.Reset}'
+    if channel is not None:
+        log_msg += f'{ANSI.BackgroundWhite}{ANSI.BrightBlack} - {channel}{ANSI.Reset}'
+    if display_name is not None:
+        log_msg += f' {ANSI.Blue}{display_name}{ANSI.Reset}'
+    if receiver is not None:
+        log_msg += f'{ANSI.Blue} -> {receiver}{ANSI.Reset}'
+    if emoji is not None:
+        log_msg += f' {emoji}'
+    if content is not None:
+        log_msg += f': {content}'
+
+
 def get_lumberjack(
         name: str,
         name_color=ANSI.BrightBlue,
