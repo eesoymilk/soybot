@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+import random
 from textwrap import dedent
 import discord
 import asyncio
@@ -6,7 +7,7 @@ import asyncio
 from discord import app_commands as ac, Message, Member
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot
-from utils import NTHU, ANSI, Config, get_lumberjack
+from utils import NTHU, ANSI, Config, get_lumberjack, SoyReact, SoyReply
 
 
 def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
@@ -29,6 +30,9 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
 
 
 logger = get_lumberjack('NTHU', ANSI.Yellow)
+solitaire_seqences = {
+    'starburst': ('s', 't', 'a', 'r'),
+}
 
 
 @ac.context_menu(name='憤怒狗狗')
@@ -51,6 +55,24 @@ async def angry_dog_reactions(interaction: discord.Interaction, message: discord
     await interaction.followup.send(content='**憤怒狗狗**已送出')
 
 
+def chance(x: float = 1.0) -> bool:
+    return x > random.random()
+
+
+async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot):
+    if soy_react is None or not chance(soy_react.activation_probability):
+        return
+
+    matched_ids = Config.get_emoji_ids_by_tags(*soy_react.emoji_tags)
+    emojis = [id if isinstance(id, str) else bot.get_emoji(id)
+              for id in random.sample(matched_ids, soy_react.count)]
+    await asyncio.gather(*(msg.add_reaction(emoji) for emoji in emojis))
+
+
+async def reply_msg(soy_reply: SoyReply, msg: discord.Message, bot: commands.Bot):
+    ...
+
+
 def is_cohesive(a: Message, b: Message) -> bool:
     if a.author == b.author:
         return False
@@ -61,27 +83,51 @@ def is_cohesive(a: Message, b: Message) -> bool:
     return False
 
 
-@dataclass()
+@dataclass
 class MessageStreak:
     last_message: Message
     count: int = 1
+
+
+@dataclass(order=True, unsafe_hash=True)
+class SolitaireTracker:
+    sequence: list[str] = field(hash=False, compare=False)
+    index: int = field(hash=True)
+    state: int = field(default=1, hash=False, compare=False)
 
 
 class NthuCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self._streaks: dict[int, MessageStreak] = dict()
+        self._solitaires: dict[int, set[SolitaireTracker]] = dict()
 
     @commands.Cog.listener()
     async def on_member_join(self, mem: Member) -> None:
+        if mem.guild.id != NTHU.guild_id:
+            return
+
         await mem.guild.system_channel.send(dedent(f'''\
             歡迎{mem.mention}加入**{mem.guild.name}**！
 
             請至{mem.guild.get_channel(NTHU.intro_channel_id).mention}留下您的系級和簡短的自我介紹，
             讓我們更加認識你/妳喔！'''))
 
-    @commands.Cog.listener()
-    async def on_message(self, msg: Message):
+    @commands.Cog.listener(name='on_message')
+    async def auto_respond(self, msg: Message):
+        if msg.guild.id != NTHU.guild_id:
+            return
+        # process author
+
+        # process content
+        aws = []
+        soy_react, soy_reply = Config.get_action_by_user_id(msg.author.id)
+        aws.append(react_msg(soy_react, msg, self.bot))
+        aws.append(reply_msg(soy_reply, msg, self.bot))
+        await asyncio.gather(*aws)
+
+    @commands.Cog.listener(name='on_message')
+    async def message_streak(self, msg: Message):
         # ignore own message and bots
         if msg.author.id == self.bot.user.id or msg.author.bot:
             return
@@ -100,44 +146,39 @@ class NthuCog(Cog):
 
         self._streaks[msg.channel.id].last_message = msg
 
-        # log_details = {
-        #     'guild': msg.guild.name,
-        #     'channel': msg.channel.name,
-        #     'display_name': msg.author.display_name,
-        #     'content': msg.content,
-        # }
-        # self.logger.info(rich_logging_formatter(**log_details))
+    @Cog.listener(name='on_message')
+    async def message_solitaire(self, msg: Message):
+        if msg.guild.id != Config.guilds['debug']:
+            return
 
-    # @commands.Cog.listener()
-    # async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-    #     log_details = {
-    #         'guild': reaction.message.guild.name,
-    #         'channel': reaction.message.channel.name,
-    #         'display_name': user.display_name,
-    #         'receiver': reaction.message.author.display_name
-    #         if user.display_name != reaction.message.author.display_name else None,
-    #         'emoji': reaction.emoji,
-    #     }
-    #     self.logger.info(rich_logging_formatter(**log_details))
+        content, cid = msg.content, msg.channel.id
 
-    #     # if reaction.count > 1 and self.bot.user.id not in [user.id async for user in reaction.users()]:
-    #     if reaction.count > 2:
-    #         await reaction.message.add_reaction(reaction)
+        if cid not in self._solitaires:
+            self._solitaires[cid] = set()
+        if not content:
+            self._solitaires[cid].clear()
 
-    # @commands.Cog.listener()
-    # async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
-    #     log_details = {
-    #         'guild': reaction.message.guild.name,
-    #         'channel': reaction.message.channel.name,
-    #         'display_name': user.display_name,
-    #         'receiver': reaction.message.author.display_name
-    #         if user.display_name != reaction.message.author.display_name else None,
-    #         'emoji': reaction.emoji,
-    #     }
-    #     self.logger.info(rich_logging_formatter(**log_details))
+        # process ongoing solitaires
+        for soli in self._solitaires[cid].copy():
+            next_kw = soli.sequence[soli.state + 1]
+            if next_kw in content and content.index(next_kw) == soli.index:
+                soli.state += 1
+                if soli.state == len(soli.sequence):
+                    print(f'Solitaire {"".join(soli.sequence)} Completed!')
+                else:
+                    print(
+                        f'Solitaire {"".join(soli.sequence)} State: {soli.state}')
+                    continue
+            self._solitaires[cid].remove(soli)
 
-    #     if user.id == self.bot.user.id and reaction.message.guild.id == Config.guilds['nthu'].id:
-    #         await reaction.message.add_reaction(reaction)
+        # detect new solitarires
+        for seq in solitaire_seqences:
+            if seq[0] in content:
+                new_index = content.index(seq[0])
+                # prevent multiple solitaires on the same index
+                if all(new_index != soli.index for soli in self._solitaires[cid]):
+                    print('soli added')
+                    self._solitaires[cid].add(SolitaireTracker(seq, new_index))
 
 
 async def setup(bot: Bot):

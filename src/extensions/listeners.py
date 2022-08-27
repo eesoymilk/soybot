@@ -1,9 +1,7 @@
-import asyncio
-import random
 import discord
 from datetime import datetime
 from discord.ext import commands
-from utils import Config, SoyReact, SoyReply, ANSI, get_lumberjack
+from utils import Config, ANSI, get_lumberjack
 
 
 def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
@@ -23,24 +21,6 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
         log_msg += f': {content}'
 
     return log_msg
-
-
-def chance(x: float = 1.0) -> bool:
-    return x > random.random()
-
-
-async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot):
-    if soy_react is None or not chance(soy_react.activation_probability):
-        return
-
-    matched_ids = Config.get_emoji_ids_by_tags(*soy_react.emoji_tags)
-    emojis = [id if isinstance(id, str) else bot.get_emoji(id)
-              for id in random.sample(matched_ids, soy_react.count)]
-    await asyncio.gather(*(msg.add_reaction(emoji) for emoji in emojis))
-
-
-async def reply_msg(soy_reply: SoyReply, msg: discord.Message, bot: commands.Bot):
-    ...
 
 
 class Listeners(commands.Cog):
@@ -63,12 +43,6 @@ class Listeners(commands.Cog):
             'content': msg.content,
         }
         self.logger.info(rich_logging_formatter(**log_details))
-
-        aws = []
-        soy_react, soy_reply = Config.get_action_by_user_id(msg.author.id)
-        aws.append(react_msg(soy_react, msg, self.bot))
-        aws.append(reply_msg(soy_reply, msg, self.bot))
-        await asyncio.gather(*aws)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):

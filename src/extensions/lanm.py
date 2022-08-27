@@ -19,6 +19,9 @@ class LanmCog(Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, mem: Member) -> None:
+        if mem.guild.id != lanm_id:
+            return
+
         await mem.guild.system_channel.send(dedent(f'''\
             歡迎{mem.mention}加入**文新社DC群**！
 

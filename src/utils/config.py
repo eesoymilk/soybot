@@ -40,6 +40,7 @@ class Config:
         'nthu': 771595191638687784,
         'debug': 874556062815100938,
         'trap_lovers': 202599307755388929,
+        'lanm': 1010521652079120384,
     }
 
     guild_ids = [id for id in guilds.values()]

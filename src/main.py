@@ -15,10 +15,8 @@ logging.getLogger('discord.http').setLevel(logging.INFO)
 # bot instance
 bot = eeSoybot(
     owner_id=Config.users['soymilk'].id,
-    # test_guild=discord.Object(Config.guilds['debug'].id),
-    # nthu_guild=discord.Object(Config.guilds['nthu'].id),
-    # my_guild=discord.Object(Config.guilds['trap_lovers'].id),
     command_prefix='!',
+    case_insensitive=True,
     intents=discord.Intents.all(),
 )
 

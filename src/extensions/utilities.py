@@ -14,7 +14,7 @@ async def sync(ctx: Context):
     if ctx.author.id != soyid:
         return
     await asyncio.gather(*[
-        ctx.bot.tree.sync(guild=guild_id)
+        ctx.bot.tree.sync(guild=discord.Object(guild_id))
         # ctx.bot.tree.sync(guild=discord.Object(guild_id))
         for guild_id in Config.guilds.values()
     ])
