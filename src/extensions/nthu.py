@@ -1,12 +1,12 @@
-from dataclasses import dataclass, field
 import random
-from textwrap import dedent
 import discord
 import asyncio
 
-from discord import app_commands as ac, Message, Member
+from discord import app_commands as ac, Message, Member, User
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot
+from dataclasses import dataclass
+from textwrap import dedent
 from utils import NTHU, ANSI, Config, get_lumberjack, SoyReact, SoyReply
 
 
@@ -89,20 +89,12 @@ class MessageStreak:
     count: int = 1
 
 
-@dataclass(order=True, unsafe_hash=True)
-class SolitaireTracker:
-    sequence: list[str] = field(hash=False, compare=False)
-    index: int = field(hash=True)
-    state: int = field(default=1, hash=False, compare=False)
-
-
 class NthuCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self._streaks: dict[int, MessageStreak] = dict()
-        self._solitaires: dict[int, set[SolitaireTracker]] = dict()
 
-    @commands.Cog.listener()
+    @Cog.listener()
     async def on_member_join(self, mem: Member) -> None:
         if mem.guild.id != NTHU.guild_id:
             return
@@ -113,9 +105,14 @@ class NthuCog(Cog):
             請至{mem.guild.get_channel(NTHU.intro_channel_id).mention}留下您的系級和簡短的自我介紹，
             讓我們更加認識你/妳喔！'''))
 
-    @commands.Cog.listener(name='on_message')
+    @Cog.listener()
+    async def on_user_update(self, before: User, after: User):
+        if before.guild_avatar == after.guild_avatar:
+            return
+
+    @Cog.listener(name='on_message')
     async def auto_respond(self, msg: Message):
-        if msg.guild.id != NTHU.guild_id:
+        if not (msg.guild or msg.guild.id == NTHU.guild_id):
             return
         # process author
 
@@ -128,57 +125,27 @@ class NthuCog(Cog):
 
     @commands.Cog.listener(name='on_message')
     async def message_streak(self, msg: Message):
-        # ignore own message and bots
-        if msg.author.id == self.bot.user.id or msg.author.bot:
+        if not (msg.guild or msg.guild.id == NTHU.guild_id) or msg.author.bot:
             return
 
+        # init a streak for a new channel
         if msg.channel.id not in self._streaks:
             self._streaks[msg.channel.id] = MessageStreak(msg)
             return
 
-        if is_cohesive(msg, self._streaks[msg.channel.id].last_message):
-            self._streaks[msg.channel.id].count += 1
-        else:
+        # reset the streak due to a different msg
+        if not is_cohesive(msg, self._streaks[msg.channel.id].last_message):
             self._streaks[msg.channel.id].count = 1
+            self._streaks[msg.channel.id].last_message = msg
+            return
+
+        self._streaks[msg.channel.id].count += 1
+
+        if msg.author.id == self.bot.user.id:
+            return
 
         if self._streaks[msg.channel.id].count == 3:
             await msg.channel.send(msg.content, stickers=msg.stickers)
-
-        self._streaks[msg.channel.id].last_message = msg
-
-    @Cog.listener(name='on_message')
-    async def message_solitaire(self, msg: Message):
-        if msg.guild.id != Config.guilds['debug']:
-            return
-
-        content, cid = msg.content, msg.channel.id
-
-        if cid not in self._solitaires:
-            self._solitaires[cid] = set()
-        if not content:
-            self._solitaires[cid].clear()
-
-        # process ongoing solitaires
-        for soli in self._solitaires[cid].copy():
-            next_kw = soli.sequence[soli.state + 1]
-            if next_kw in content and content.index(next_kw) == soli.index:
-                soli.state += 1
-                if soli.state == len(soli.sequence):
-                    print(f'Solitaire {"".join(soli.sequence)} Completed!')
-                else:
-                    print(
-                        f'Solitaire {"".join(soli.sequence)} State: {soli.state}')
-                    continue
-            self._solitaires[cid].remove(soli)
-
-        # detect new solitarires
-        for seq in solitaire_seqences:
-            if seq[0] in content:
-                new_index = content.index(seq[0])
-                # prevent multiple solitaires on the same index
-                if all(new_index != soli.index for soli in self._solitaires[cid]):
-                    print('soli added')
-                    self._solitaires[cid].add(SolitaireTracker(seq, new_index))
 
 
 async def setup(bot: Bot):

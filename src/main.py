@@ -1,8 +1,10 @@
 import asyncio
-from pathlib import Path
+import os
 import discord
 import logging
 import logging.handlers
+from pathlib import Path
+from dotenv import load_dotenv
 from utils import Config
 from utils import get_lumberjack
 from eeSoybot import eeSoybot
@@ -27,6 +29,8 @@ async def main():
             if p.stem != '__init__']
     await asyncio.gather(*[bot.load_extension(ext) for ext in exts])
     async with bot:
-        await bot.start(Config.TOKEN)
+        load_dotenv()
+        TOKEN = os.environ.get('TOKEN')
+        await bot.start(TOKEN)
 
 asyncio.run(main())

@@ -1,9 +1,4 @@
-import os
-from dotenv import load_dotenv
 from dataclasses import dataclass
-
-
-load_dotenv()
 
 
 @dataclass(frozen=True)
@@ -34,7 +29,6 @@ class Emoji:
 
 
 class Config:
-    TOKEN = os.environ.get('TOKEN')
 
     guilds = {
         'nthu': 771595191638687784,
@@ -81,7 +75,7 @@ class Config:
         'dodo': User(
             id=618679878144753664,
             soy_react=SoyReact(emoji_tags=('dodo',),
-                               activation_probability=0.3)),
+                               activation_probability=0.1)),
     }
 
     emojis = {
