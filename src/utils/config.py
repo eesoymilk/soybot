@@ -71,7 +71,7 @@ class Config:
         'shili': User(
             id=777196949903376396,
             soy_react=SoyReact(emoji_tags=('pineapplebun',),
-                               activation_probability=0.3)),
+                               activation_probability=0.5)),
         'dodo': User(
             id=618679878144753664,
             soy_react=SoyReact(emoji_tags=('dodo',),

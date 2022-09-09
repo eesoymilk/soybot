@@ -1,13 +1,14 @@
+from dataclasses import dataclass
+from enum import IntEnum
 import random
 import discord
 import asyncio
 
-from discord import app_commands as ac, Message, Member, User
+from discord import app_commands as ac, Message, Member, User, StickerItem
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot
-from dataclasses import dataclass
 from textwrap import dedent
-from utils import NTHU, ANSI, Config, get_lumberjack, SoyReact, SoyReply
+from utils import NTHU, ANSI, Config, get_lumberjack, SoyReact
 
 
 def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
@@ -30,9 +31,6 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
 
 
 logger = get_lumberjack('NTHU', ANSI.Yellow)
-solitaire_seqences = {
-    'starburst': ('s', 't', 'a', 'r'),
-}
 
 
 @ac.context_menu(name='憤怒狗狗')
@@ -55,12 +53,12 @@ async def angry_dog_reactions(interaction: discord.Interaction, message: discord
     await interaction.followup.send(content='**憤怒狗狗**已送出')
 
 
-def chance(x: float = 1.0) -> bool:
+def do_chance(x: float = 1.0) -> bool:
     return x > random.random()
 
 
 async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot):
-    if soy_react is None or not chance(soy_react.activation_probability):
+    if soy_react is None or not do_chance(soy_react.activation_probability):
         return
 
     matched_ids = Config.get_emoji_ids_by_tags(*soy_react.emoji_tags)
@@ -69,24 +67,141 @@ async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot
     await asyncio.gather(*(msg.add_reaction(emoji) for emoji in emojis))
 
 
-async def reply_msg(soy_reply: SoyReply, msg: discord.Message, bot: commands.Bot):
-    ...
+class ResponseType(IntEnum):
+    React = 1
+    Reply = 2
+    Sticker = 3
 
 
-def is_cohesive(a: Message, b: Message) -> bool:
-    if a.author == b.author:
-        return False
-    if a.content and a.content == b.content:
-        return True
-    if a.stickers and a.stickers == b.stickers:
-        return True
-    return False
+nthu_users = {
+    'soymilk': {
+        'id': 202249480148353025,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('soymilk', 'pineapplebun'),
+            'chance': 0.1
+        }
+    },
+    'gay_dog': {
+        'id': 284350778087309312,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('disgusted',),
+            'chance': 0.4
+        }
+    },
+    'howard': {
+        'id': 613683023300395029,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('wtf',),
+            'chance': 0.3
+        }
+    },
+    'ayu': {
+        'id': 557591275227054090,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('gay',),
+            'chance': 0.4
+        }
+    },
+    'snow': {
+        'id': 565862991061581835,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('gay',),
+            'chance': 0.3
+        }
+    },
+    'paper': {
+        'id': 402060040518762497,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('gay',),
+            'chance': 0.3
+        }
+    },
+    'feilin': {
+        'id': 388739972343267329,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('feilin',),
+            'chance': 0.3
+        }
+    },
+    'shili': {
+        'id': 777196949903376396,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('pineapplebun',),
+            'chance': 0.3
+        }
+    },
+    'dodo': {
+        'id': 618679878144753664,
+        'soy_response': {
+            'response_type': ResponseType.React,
+            'pool': ('dodo',),
+            'chance': 0.1
+        }
+    }
+}
 
 
 @dataclass
+class SoyResponse:
+    resp_type: ResponseType
+    pool: list[str | StickerItem]
+    chance: float
+
+    async def respond(self, resp_cxt):
+        if self.resp_type == ResponseType.React:
+            ...
+        elif self.resp_type == ResponseType.Reply:
+            ...
+        elif self.resp_type == ResponseType.Sticker:
+            ...
+
+
 class MessageStreak:
-    last_message: Message
-    count: int = 1
+    def __init__(self, msg: Message):
+        self.channel = msg.channel
+        self._new_streak(msg)
+
+    def _new_streak(self, msg: Message):
+        self.content = msg.content
+        self.stickers = msg.stickers
+        self.reference = msg.reference
+        self.author_ids = {msg.author.id}
+        self.streak_count = 1
+
+    async def do_streak(self, msg: Message):
+        if not self.validate_streak(msg):
+            self._new_streak(msg)
+            return
+
+        if self.reference and self.reference != msg.reference:
+            self.reference = None
+
+        self.author_ids.add(msg.author.id)
+        self.streak_count += 1
+
+        if self.streak_count == 3:
+            await self.channel.send(
+                self.content,
+                stickers=self.stickers,
+                reference=self.reference
+            )
+
+    def validate_streak(self, msg: Message):
+        if msg.author.id in self.author_ids:
+            return False
+        if self.content and self.content == msg.content:
+            return True
+        if self.stickers and self.stickers == msg.stickers:
+            return True
+        return False
 
 
 class NthuCog(Cog):
@@ -112,40 +227,29 @@ class NthuCog(Cog):
 
     @Cog.listener(name='on_message')
     async def auto_respond(self, msg: Message):
-        if not (msg.guild or msg.guild.id == NTHU.guild_id):
+        if not (msg.guild and msg.guild.id == NTHU.guild_id):
             return
         # process author
 
         # process content
         aws = []
-        soy_react, soy_reply = Config.get_action_by_user_id(msg.author.id)
+        soy_react, _ = Config.get_action_by_user_id(msg.author.id)
         aws.append(react_msg(soy_react, msg, self.bot))
-        aws.append(reply_msg(soy_reply, msg, self.bot))
         await asyncio.gather(*aws)
 
     @commands.Cog.listener(name='on_message')
     async def message_streak(self, msg: Message):
-        if not (msg.guild or msg.guild.id == NTHU.guild_id) or msg.author.bot:
+        if not (msg.guild and msg.guild.id == NTHU.guild_id) or msg.author.bot:
             return
+
+        cid = msg.channel.id
 
         # init a streak for a new channel
-        if msg.channel.id not in self._streaks:
-            self._streaks[msg.channel.id] = MessageStreak(msg)
+        if cid not in self._streaks:
+            self._streaks[cid] = MessageStreak(msg)
             return
 
-        # reset the streak due to a different msg
-        if not is_cohesive(msg, self._streaks[msg.channel.id].last_message):
-            self._streaks[msg.channel.id].count = 1
-            self._streaks[msg.channel.id].last_message = msg
-            return
-
-        self._streaks[msg.channel.id].count += 1
-
-        if msg.author.id == self.bot.user.id:
-            return
-
-        if self._streaks[msg.channel.id].count == 3:
-            await msg.channel.send(msg.content, stickers=msg.stickers)
+        await self._streaks[cid].do_streak(msg)
 
 
 async def setup(bot: Bot):

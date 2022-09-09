@@ -1,6 +1,6 @@
 import discord
 
-from discord import (app_commands as ac, Embed)
+from discord import (app_commands as ac, Embed, Member, Interaction)
 from discord.ext.commands import Bot
 from utils import ANSI
 from utils import get_lumberjack
@@ -28,13 +28,17 @@ def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None
     return log_msg
 
 
-async def avatar(interaction: discord.Interaction, target: discord.Member):
+async def avatar(interaction: Interaction, target: Member):
     if target.id == interaction.client.user.id:
         await interaction.response.send_message(f'不要ㄐ查豆漿ㄐㄐ人好ㄇ', ephemeral=True)
         return
 
     await interaction.response.defer()
 
+    if isinstance(target, Member):
+        avatar_url = target.display_avatar.url
+    else:
+        avatar_url = target.avatar.url
     description = f'**{interaction.user.display_name}**稽查了{f"{target.mention}" if interaction.user.id != target.id else "自己"}'
     embed = Embed(
         description=description,
@@ -52,12 +56,12 @@ async def avatar(interaction: discord.Interaction, target: discord.Member):
     fetched_target = await interaction.client.fetch_user(target.id)
     if fetched_target.banner is not None:
         embed.set_thumbnail(
-            url=target.display_avatar
+            url=avatar_url
         ).set_image(
             url=fetched_target.banner
         )
     else:
-        embed.set_image(url=target.display_avatar)
+        embed.set_image(url=avatar_url)
 
     await interaction.followup.send(embed=embed)
 
