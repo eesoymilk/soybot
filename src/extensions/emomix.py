@@ -1,6 +1,8 @@
 from asyncio.log import logger
-from discord import app_commands as ac, Interaction
-from discord.ext.commands import Bot
+import random
+from discord import app_commands as ac, Interaction, Message
+from discord.app_commands import Group
+from discord.ext.commands import Bot, Cog
 from utils import get_lumberjack, Config
 import aiohttp
 
@@ -532,7 +534,11 @@ def emo_to_code_converter(e: str):
     return '-'.join([(f'u{ord(c):X}').lower() for c in e])
 
 
-async def get_mixed(code1: str, code2: str) -> str:
+async def get_mixed(code1: str, code2: str = None) -> str:
+    if code2 is None:
+        code2 = f'u{random.choice(list(knownSupportedEmoji))}'.replace(
+            '-', '-u')
+
     combined_urls = [f'{code1}/{code1}_{code2}.png',
                      f'{code2}/{code2}_{code1}.png']
 
@@ -548,28 +554,63 @@ async def get_mixed(code1: str, code2: str) -> str:
     raise ValueError('Combination not found')
 
 
-@ac.command(description='來組合表情吧！')
-@ac.guilds(*Config.guild_ids)
-async def emomix(interation: Interaction, emo1: str, emo2: str):
-    try:
-        codes = [emo_to_code_converter(emo1), emo_to_code_converter(emo2)]
-    except ValueError:
-        await interation.response.send_message(
-            f'{emo1} or {emo2} is not supported emoji.\nPlease refer to https://emojikitchen.dev/ for all conbinations.',
-            ephemeral=True
-        )
-        return
+class EmoListeners(Cog):
+    def __init__(self, bot: Bot):
+        self.bot = bot
 
-    try:
-        result_url = await get_mixed(*codes)
+    @Cog.listener()
+    async def on_message(self, msg: Message):
+        if not (msg.author.id == Config.users['dodo'].id and .05 > random.random()):
+            return
+
+        while True:
+            try:
+                result_url = await get_mixed('u1f633')
+                break
+            except ValueError:
+                pass
+
+        await msg.reply(result_url)
+
+
+@ac.guilds(*Config.guild_ids)
+class EmomixGroup(Group, name='emo'):
+
+    @ac.command(name='自己組合', description='來組合表情吧！')
+    @ac.describe(emo1='請輸入一個表情符號，勿輸入其他多餘字元！', emo2='請輸入一個表情符號，勿輸入其他多餘字元！')
+    @ac.rename(emo1='第一個表情符號', emo2='第二個表情符號')
+    async def emomix(self, interation: Interaction, emo1: str, emo2: str):
+        try:
+            codes = [emo_to_code_converter(emo1), emo_to_code_converter(emo2)]
+        except ValueError:
+            await interation.response.send_message(
+                f'{emo1} or {emo2} is not supported emoji.\nPlease refer to https://emojikitchen.dev/ for all combinations.',
+                ephemeral=True
+            )
+            return
+
+        try:
+            result_url = await get_mixed(*codes)
+            await interation.response.send_message(result_url)
+        except ValueError:
+            await interation.response.send_message(
+                f'{emo1} and {emo2} cannot be combined.\nPlease refer to https://emojikitchen.dev/ for all combinations.',
+                ephemeral=True
+            )
+
+    @ac.command(name='度度', description='😳😳😳')
+    async def dodo_emo(self, interation: Interaction):
+        while True:
+            try:
+                result_url = await get_mixed('u1f633')
+                break
+            except ValueError:
+                pass
+
         await interation.response.send_message(result_url)
-    except ValueError:
-        await interation.response.send_message(
-            f'{emo1} and {emo2} cannot be combined.\nPlease refer to https://emojikitchen.dev/ for all conbinations.',
-            ephemeral=True
-        )
 
 
 async def setup(bot: Bot) -> None:
-    bot.tree.add_command(emomix)
+    bot.tree.add_command(EmomixGroup())
+    await bot.add_cog(EmoListeners(bot))
     logger.info('EmoMix Commands Added')
