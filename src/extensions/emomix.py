@@ -531,7 +531,7 @@ def emo_to_code_converter(e: str):
     if res not in knownSupportedEmoji:
         raise ValueError('Not Supported')
         return None
-    return '-'.join([(f'u{ord(c):X}').lower() for c in e])
+    return f'u{res}'.replace('-', '-u')
 
 
 async def get_mixed(code1: str, code2: str = None) -> str:
@@ -575,7 +575,7 @@ class EmoListeners(Cog):
 @ac.guilds(*Config.guild_ids)
 class EmomixGroup(Group, name='emo'):
 
-    @ac.command(name='自己組合', description='來組合表情吧！')
+    @ac.command(name='自己組合', description='唉唷欸欸表情可以自己組耶')
     @ac.describe(emo1='請輸入一個表情符號，勿輸入其他多餘字元！', emo2='請輸入一個表情符號，勿輸入其他多餘字元！')
     @ac.rename(emo1='第一個表情符號', emo2='第二個表情符號')
     async def emomix(self, interation: Interaction, emo1: str, emo2: str):
