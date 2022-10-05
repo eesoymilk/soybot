@@ -76,6 +76,11 @@ class Config:
             id=618679878144753664,
             soy_react=SoyReact(emoji_tags=('dodo',),
                                activation_probability=0.1)),
+        # 'pirate': User(
+        #     id=558943185124982805,
+        #     soy_react=SoyReact(emoji_tags=('dodo',),
+        #                        activation_probability=0.1)),
+
     }
 
     emojis = {

@@ -11,7 +11,7 @@ from utils import ANSI, get_lumberjack, Config
 # intro_channel_id = 1011283972166266962  # debug
 lnmc_id = 1010521652079120384
 intro_channel_id = 1010824070767583242
-logger = get_lumberjack('LANM', ANSI.Yellow)
+logger = get_lumberjack('LNMC', ANSI.Yellow)
 lnmc_events: list[dict[str, str | datetime]] = [
     {
         'name': '幹部研習會',
