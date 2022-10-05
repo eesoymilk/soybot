@@ -547,7 +547,6 @@ async def get_mixed(code1: str, code2: str = None) -> str:
             url = f'{emo_base_url}/{date}'
             for combined_url in combined_urls:
                 async with cs.get(f'{url}/{combined_url}') as resp:
-                    logger.warning(resp.url)
                     if resp.status == 200:
                         return resp.url
 
