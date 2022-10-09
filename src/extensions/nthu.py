@@ -181,8 +181,9 @@ class MessageStreak:
             self._new_streak(msg)
             return
 
-        if self.reference and self.reference != msg.reference:
-            self.reference = None
+        if self.reference is not None:
+            if msg.reference is None or msg.reference.message_id != self.reference.message_id:
+                self.reference = None
 
         self.author_ids.add(msg.author.id)
         self.streak_count += 1
