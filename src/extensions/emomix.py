@@ -599,6 +599,7 @@ class EmomixGroup(Group, name='emo'):
 
     @ac.command(name='度度', description='😳😳😳')
     async def dodo_emo(self, interation: Interaction):
+        await interation.response.defer()
         while True:
             try:
                 result_url = await get_mixed('u1f633')
@@ -606,7 +607,18 @@ class EmomixGroup(Group, name='emo'):
             except ValueError:
                 pass
 
-        await interation.response.send_message(result_url)
+        await interation.followup.send(result_url)
+
+    @ac.command(name='ㄨㄨㄒ', description='妳好漂亮')
+    async def dodo_emo(self, interation: Interaction):
+        while True:
+            try:
+                result_url = await get_mixed('u1f428')
+                break
+            except ValueError:
+                pass
+
+        await interation.followup.send(result_url)
 
 
 async def setup(bot: Bot) -> None:
