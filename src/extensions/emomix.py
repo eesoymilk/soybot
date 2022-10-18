@@ -611,6 +611,7 @@ class EmomixGroup(Group, name='emo'):
 
     @ac.command(name='ㄨㄨㄒ', description='妳好漂亮')
     async def dodo_emo(self, interation: Interaction):
+        await interation.response.defer()
         while True:
             try:
                 result_url = await get_mixed('u1f428')
