@@ -610,7 +610,7 @@ class EmomixGroup(Group, name='emo'):
         await interation.followup.send(result_url)
 
     @ac.command(name='ㄨㄨㄒ', description='妳好漂亮')
-    async def dodo_emo(self, interation: Interaction):
+    async def dodo_koala(self, interation: Interaction):
         await interation.response.defer()
         while True:
             try:
