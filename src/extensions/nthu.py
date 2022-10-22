@@ -189,11 +189,19 @@ class MessageStreak:
         self.streak_count += 1
 
         if self.streak_count == 3:
+            self.streak_count += 1
             await self.channel.send(
                 self.content,
                 stickers=self.stickers,
                 reference=self.reference
             )
+        elif self.streak_count > 4:
+            if random.random() >= 0.3:
+                await self.channel.send(random.choice([
+                    '阿玉在洗版',
+                    '阿雪在洗版',
+                    '這裡不是洗版區喔 注意一下'
+                ]))
 
     def validate_streak(self, msg: Message):
         if msg.author.id in self.author_ids:
