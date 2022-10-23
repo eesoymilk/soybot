@@ -196,7 +196,7 @@ class MessageStreak:
                 reference=self.reference
             )
         elif self.streak_count > 4:
-            if random.random() >= 0.3:
+            if random.random() <= 0.3:
                 await self.channel.send(random.choice([
                     '阿玉在洗版',
                     '阿雪在洗版',
