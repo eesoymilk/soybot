@@ -82,6 +82,7 @@ class Config:
         #                        activation_probability=0.1)),
 
     }
+    user_ids = [u.id for u in users.values()]
 
     emojis = {
         'bulbasaur': Emoji(931022665790144542,

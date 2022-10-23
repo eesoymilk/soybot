@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from datetime import datetime
 from enum import IntEnum
 import random
 import discord
 import asyncio
 
-from discord import app_commands as ac, Message, Member, User, StickerItem
+from discord import app_commands as ac, Message, Member, User, StickerItem, Embed, NotFound
 from discord.ext import commands
 from discord.ext.commands import Cog, Bot
 from textwrap import dedent
@@ -231,8 +232,36 @@ class NthuCog(Cog):
 
     @Cog.listener()
     async def on_user_update(self, before: User, after: User):
-        if before.guild_avatar == after.guild_avatar:
+        daily_chat_channel_id = 771596516443029516
+        nthu_guild_id = Config.guilds['nthu']
+
+        if (nthu_guild := self.bot.get_guild(nthu_guild_id)) is None:
+            nthu_guild = await self.bot.fetch_guild(nthu_guild_id)
+
+        try:
+            if (member := nthu_guild.get_member(before.id)) is None:
+                member = await nthu_guild.fetch_member(before.id)
+        except NotFound:
             return
+
+        if before.avatar == after.avatar or before.id not in Config.user_ids:
+            return
+
+        try:
+            if (daily_chat_channel := nthu_guild.get_channel(daily_chat_channel_id)) is None:
+                daily_chat_channel = await nthu_guild.fetch_channel(daily_chat_channel_id)
+        except NotFound:
+            return
+
+        await daily_chat_channel.send(f'主要！ **{member.mention}**又換頭貼了！', embed=Embed(
+            description='➡原頭貼➡\n\n⬇新頭貼⬇',
+            color=member.color,
+            timestamp=datetime.now(),
+        ).set_thumbnail(
+            url=before.avatar
+        ).set_image(
+            url=after.avatar
+        ))
 
     @Cog.listener(name='on_message')
     async def auto_respond(self, msg: Message):
