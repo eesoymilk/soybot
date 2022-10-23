@@ -48,6 +48,10 @@ class Config:
             id=284350778087309312,
             soy_react=SoyReact(emoji_tags=('disgusted',),
                                activation_probability=0.4)),
+        'js_dog': User(
+            id=677899902172266507,
+            soy_react=SoyReact(emoji_tags=('js_bear',),
+                               activation_probability=0.3)),
         'howard': User(
             id=613683023300395029,
             soy_react=SoyReact(emoji_tags=('wtf',),
@@ -98,6 +102,7 @@ class Config:
         'shaking_dog': Emoji(991676443174129764, ('a', 'shaking', 'party', 'dog', 'dog_bundle')),
 
         'party_dog': Emoji(930768322226716672, ('party', 'dog', 'dog_bundle')),
+        'js_bear': Emoji(780304160834584607, ('js_bear', )),
 
 
         'gay_lao': Emoji(786891103722930206, ('gay', 'ayu', 'snow', 'paper')),
