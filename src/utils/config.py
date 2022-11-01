@@ -50,7 +50,7 @@ class Config:
                                activation_probability=0.4)),
         'js_dog': User(
             id=677899902172266507,
-            soy_react=SoyReact(emoji_tags=('js_bear',),
+            soy_react=SoyReact(emoji_tags=('js_bear', 'ayu'),
                                activation_probability=0.3)),
         'howard': User(
             id=613683023300395029,
@@ -58,7 +58,7 @@ class Config:
                                activation_probability=0.3)),
         'ayu': User(
             id=557591275227054090,
-            soy_react=SoyReact(emoji_tags=('gay',),
+            soy_react=SoyReact(emoji_tags=('gay', 'ayu'),
                                activation_probability=0.4)),
         'snow': User(
             id=565862991061581835,
@@ -79,6 +79,10 @@ class Config:
         'dodo': User(
             id=618679878144753664,
             soy_react=SoyReact(emoji_tags=('dodo',),
+                               activation_probability=0.1)),
+        'ayeah': User(
+            id=854707093532311582,
+            soy_react=SoyReact(emoji_tags=tuple(),
                                activation_probability=0.1)),
         # 'pirate': User(
         #     id=558943185124982805,
@@ -103,6 +107,7 @@ class Config:
 
         'party_dog': Emoji(930768322226716672, ('party', 'dog', 'dog_bundle')),
         'js_bear': Emoji(780304160834584607, ('js_bear', )),
+        'ayu_cat': Emoji(989934658454183946, ('ayu', )),
 
 
         'gay_lao': Emoji(786891103722930206, ('gay', 'ayu', 'snow', 'paper')),
