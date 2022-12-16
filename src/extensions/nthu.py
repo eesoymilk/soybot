@@ -54,6 +54,36 @@ async def angry_dog_reactions(interaction: discord.Interaction, message: discord
     await interaction.followup.send(content='**憤怒狗狗**已送出')
 
 
+@ac.context_menu(name='阿袋狗狗')
+@ac.guilds(NTHU.guild_id)
+@ac.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
+async def ugly_dog_reactions(interaction: discord.Interaction, message: discord.Message):
+    log_details = {
+        'guild': message.channel.guild.name,
+        'channel': message.channel.name,
+        'display_name': interaction.user.display_name,
+        'receiver': message.author.display_name,
+    }
+    await interaction.response.defer(ephemeral=True, thinking=True)
+    logger.info(rich_logging_formatter(**log_details))
+
+    emojis = []
+
+    for id in Config.get_emoji_ids_by_tags('ugly_dog'):
+        emoji = interaction.client.get_emoji(id)
+        if emoji is not None:
+            emojis.append(emoji)
+
+    await asyncio.gather(*(message.add_reaction(emoji) for emoji in emojis))
+
+    # await asyncio.gather(*(
+    #     message.add_reaction(emoji)
+    #     for emoji in [interaction.client.get_emoji(id)
+    #                   for id in Config.get_emoji_ids_by_tags('ugly_dog')]
+    # ))
+    await interaction.followup.send(content='**阿袋狗狗**已送出')
+
+
 def do_chance(x: float = 1.0) -> bool:
     return x > random.random()
 
@@ -292,6 +322,7 @@ class NthuCog(Cog):
 
 async def setup(bot: Bot):
     bot.tree.add_command(angry_dog_reactions)
+    bot.tree.add_command(ugly_dog_reactions)
     await bot.add_cog(
         NthuCog(bot),
         guild=discord.Object(NTHU.guild_id)

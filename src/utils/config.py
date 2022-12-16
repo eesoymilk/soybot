@@ -66,7 +66,7 @@ class Config:
                                activation_probability=0.3)),
         'paper': User(
             id=402060040518762497,
-            soy_react=SoyReact(emoji_tags=('gay',),
+            soy_react=SoyReact(emoji_tags=('gay', 'ugly_dog'),
                                activation_probability=0.3)),
         'feilin': User(
             id=388739972343267329,
@@ -110,6 +110,7 @@ class Config:
         'ayu_cat': Emoji(989934658454183946, ('ayu', )),
 
 
+
         'gay_lao': Emoji(786891103722930206, ('gay', 'ayu', 'snow', 'paper')),
         'kekw': Emoji(778670717784293386, ('lol',)),
         'pineapplebun': Emoji(956009591374741575, ('pineapplebun',)),
@@ -119,6 +120,15 @@ class Config:
         'miko': Emoji(823469253923569686, ('feilin',)),
         'pekora': Emoji(802139497567223808, ('feilin',)),
         'watson_eat_sand': Emoji(793809340997828609, ('feilin',)),
+
+        'D5NonChiwawa': Emoji(791134356563034122, ('paperbag', 'ugly_dog')),
+        'D6AwkChiwawa': Emoji(791134264842387496, ('paperbag', 'ugly_dog')),
+        'D7Chiwawa': Emoji(95841988099717129, ('paperbag', 'ugly_dog')),
+        'D7MuchUglierChiwawa': Emoji(1052637556388397167, ('paperbag', 'ugly_dog')),
+        'D7UglierChiwawa': Emoji(1052638311539277844, ('paperbag', 'ugly_dog')),
+        'D87dog': Emoji(980870480804339712, ('paperbag', 'ugly_dog')),
+        'Dg8dog': Emoji(1052636415260897360, ('paperbag', 'ugly_dog')),
+        'huskiwawa': Emoji(103042484305055748, ('paperbag', 'ugly_dog')),
 
         'joy': Emoji('😂', ('lol')),
         'nauseated_face': Emoji('🤢', ('gay_dog', 'disgusted')),
