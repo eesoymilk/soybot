@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from utils import Config
 
+
 soyid = Config.users['soymilk'].id
 
 
@@ -21,13 +22,22 @@ async def sync(ctx: Context):
     await ctx.send("commands synced to all guilds")
 
 
+# sync to all
+@commands.command()
+async def syncall(ctx: Context):
+    if ctx.author.id != soyid:
+        return
+    await ctx.bot.tree.sync()
+    await ctx.send("commands synced to all guilds")
+
+
 # reload extension
 @commands.command()
 async def reload(ctx: Context, query: str = None):
     if ctx.author.id != soyid:
         return
 
-    exts = [p.stem for p in Path('./src/extensions').glob('*.py')]
+    exts = [p.stem for p in Path('./extensions').glob('*.py')]
     if query is not None:
         exts = list(filter(lambda ext: query in ext, exts))
     await asyncio.gather(*[
@@ -44,5 +54,6 @@ async def test(ctx: commands.Context):
 
 async def setup(bot: commands.Bot):
     bot.add_command(sync)
+    bot.add_command(syncall)
     bot.add_command(reload)
     bot.add_command(test)

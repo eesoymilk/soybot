@@ -84,117 +84,6 @@ async def ugly_dog_reactions(interaction: discord.Interaction, message: discord.
     await interaction.followup.send(content='**阿袋狗狗**已送出')
 
 
-def do_chance(x: float = 1.0) -> bool:
-    return x > random.random()
-
-
-async def react_msg(soy_react: SoyReact, msg: discord.Message, bot: commands.Bot):
-    if soy_react is None or not do_chance(soy_react.activation_probability):
-        return
-
-    matched_ids = Config.get_emoji_ids_by_tags(*soy_react.emoji_tags)
-    emojis = [id if isinstance(id, str) else bot.get_emoji(id)
-              for id in random.sample(matched_ids, soy_react.count)]
-    await asyncio.gather(*(msg.add_reaction(emoji) for emoji in emojis))
-
-
-class ResponseType(IntEnum):
-    React = 1
-    Reply = 2
-    Sticker = 3
-
-
-nthu_users = {
-    'soymilk': {
-        'id': 202249480148353025,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('soymilk', 'pineapplebun'),
-            'chance': 0.1
-        }
-    },
-    'gay_dog': {
-        'id': 284350778087309312,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('disgusted',),
-            'chance': 0.4
-        }
-    },
-    'howard': {
-        'id': 613683023300395029,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('wtf',),
-            'chance': 0.3
-        }
-    },
-    'ayu': {
-        'id': 557591275227054090,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('gay',),
-            'chance': 0.4
-        }
-    },
-    'snow': {
-        'id': 565862991061581835,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('gay',),
-            'chance': 0.3
-        }
-    },
-    'paper': {
-        'id': 402060040518762497,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('gay',),
-            'chance': 0.3
-        }
-    },
-    'feilin': {
-        'id': 388739972343267329,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('feilin',),
-            'chance': 0.3
-        }
-    },
-    'shili': {
-        'id': 777196949903376396,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('pineapplebun',),
-            'chance': 0.3
-        }
-    },
-    'dodo': {
-        'id': 618679878144753664,
-        'soy_response': {
-            'response_type': ResponseType.React,
-            'pool': ('dodo',),
-            'chance': 0.1
-        }
-    }
-}
-
-
-@dataclass
-class SoyResponse:
-    resp_type: ResponseType
-    pool: list[str | StickerItem]
-    chance: float
-
-    async def respond(self, resp_cxt):
-        if self.resp_type == ResponseType.React:
-            ...
-        elif self.resp_type == ResponseType.Reply:
-            ...
-        elif self.resp_type == ResponseType.Sticker:
-            ...
-
-
 class MessageStreak:
     def __init__(self, msg: Message):
         self.channel = msg.channel
@@ -292,18 +181,6 @@ class NthuCog(Cog):
         ).set_image(
             url=after.avatar
         ))
-
-    @Cog.listener(name='on_message')
-    async def auto_respond(self, msg: Message):
-        if not (msg.guild and msg.guild.id == NTHU.guild_id):
-            return
-        # process author
-
-        # process content
-        aws = []
-        soy_react, _ = Config.get_action_by_user_id(msg.author.id)
-        aws.append(react_msg(soy_react, msg, self.bot))
-        await asyncio.gather(*aws)
 
     @commands.Cog.listener(name='on_message')
     async def message_streak(self, msg: Message):

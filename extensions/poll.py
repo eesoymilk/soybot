@@ -12,7 +12,7 @@ from datetime import datetime
 from utils import Config
 from utils import get_lumberjack
 
-logger = get_lumberjack('Poll')
+log = get_lumberjack(__name__)
 
 
 def join_str(l: list[str], sep='', bold=False, italic=False) -> str:
@@ -137,12 +137,12 @@ class PollDetails(ui.Modal):
         super().__init__(title=f'【{join_str(poll.description.values())}】的投票')
 
     async def on_timeout(self):
-        logger.warning(
+        log.warning(
             f'{self.poll.chat_interaction.user.display_name}\'s Modal timeout'
         )
 
     async def on_submit(self, interaction: discord.Interaction):
-        logger.info(
+        log.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Modal received.'
         )
 
@@ -182,14 +182,14 @@ class PollDetails(ui.Modal):
             icon_url=interaction.user.display_avatar.url
         )
 
-        logger.info(
+        log.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Poll is ready.'
         )
         # stop the view so that the coro proceed
         self.stop()
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
-        logger.exception(error)
+        log.exception(error)
         await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
         # Make sure we know what the error actually is
         # traceback.print_tb(error.__traceback__)
@@ -210,7 +210,7 @@ class PollSelect(ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        logger.info(
+        log.info(
             f'{self.poll.title} | {interaction.user.display_name} | {join_str(self.values, sep=", ")}'
         )
 
@@ -268,7 +268,7 @@ class Poll:
         self.pools: dict[str, set[discord.Member]]
         self.voters: set[discord.Member]
 
-        logger.info(
+        log.info(
             f'A Poll instance is created for {chat_interaction.user.display_name}'
         )
 
@@ -284,7 +284,7 @@ class Poll:
         await self.chat_interaction.response.send_modal(self.modal)
 
     async def start(self) -> None:
-        logger.info(
+        log.info(
             f'{self.title} started | {join_str(self.description.values(), sep=" ")}'
         )
 
@@ -300,7 +300,7 @@ class Poll:
 
         # send poll result
         self.res_message = await self.poll_message.reply(embed=poll_result_embed(self))
-        logger.debug(f'{self.title} | result embed generated')
+        log.debug(f'{self.title} | result embed generated')
 
         # edit poll message
         self.poll_view.clear_items().add_item(ui.Button(
@@ -308,15 +308,15 @@ class Poll:
             url=self.res_message.jump_url,
             label='查看投票結果',
         ))
-        logger.debug(f'{self.title} | original view edited')
+        log.debug(f'{self.title} | original view edited')
         self.poll_embed.title = f'***投票已結束 - {self.title}***'
         self.poll_embed.add_field(
             name='投票選項',
             value=join_str(self.pools.keys(), sep='\n')
         )
-        # logger.debug(f'{self.title} | original embed edited')
+        # log.debug(f'{self.title} | original embed edited')
         await self.poll_message.edit(view=self.poll_view, embed=self.poll_embed)
-        logger.info(f'{self.title} | ended')
+        log.info(f'{self.title} | ended')
 
 
 @app_commands.command(name="poll", description='發起投票吧！')
@@ -352,9 +352,9 @@ async def poll_command(
     if await poll.modal.wait():
         return
     await poll.start()
-    logger.debug('start timer')
+    log.debug('start timer')
     await asyncio.sleep(poll.duration)
-    logger.debug('call end function')
+    log.debug('call end function')
     await poll.end()
 
 

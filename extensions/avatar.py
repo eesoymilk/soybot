@@ -5,8 +5,9 @@ from discord.ext.commands import Bot
 from utils import ANSI
 from utils import get_lumberjack
 from utils.config import Config
+from extensions.autoresponse import fetch_author_responses
 
-logger = get_lumberjack('Avatar', ANSI.Yellow)
+log = get_lumberjack(__name__, ANSI.Yellow)
 
 
 def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
@@ -63,6 +64,14 @@ async def avatar(interaction: Interaction, target: Member):
     else:
         embed.set_image(url=avatar_url)
 
+    autoreaction = (await fetch_author_responses(interaction.client, interaction.guild)).get(target.id)
+
+    if autoreaction is not None:
+        embed.add_field(
+            name=f'自動表情 (觸發機率 {autoreaction.rate})',
+            value=' '.join(autoreaction.responses)
+        )
+
     await interaction.followup.send(embed=embed)
 
     log_details = {
@@ -71,18 +80,16 @@ async def avatar(interaction: Interaction, target: Member):
         'display_name': interaction.user.display_name,
         'receiver': target.display_name,
     }
-    logger.info(rich_logging_formatter(**log_details))
+    log.info(rich_logging_formatter(**log_details))
 
 
 @ac.command(name="avatar", description='稽查')
 @ac.rename(target='稽查對象')
-@ac.guilds(*Config.guild_ids)
 async def avatar_slash(interaction: discord.Interaction, target: discord.Member) -> None:
     await avatar(interaction, target)
 
 
 @ac.context_menu(name='稽查頭貼')
-@ac.guilds(*Config.guild_ids)
 async def avatar_ctx_menu(interaction: discord.Interaction, target: discord.Member):
     await avatar(interaction, target=target)
 
@@ -90,4 +97,4 @@ async def avatar_ctx_menu(interaction: discord.Interaction, target: discord.Memb
 async def setup(bot: Bot):
     bot.tree.add_command(avatar_slash)
     bot.tree.add_command(avatar_ctx_menu)
-    logger.info('extension loaded')
+    log.info('extension loaded')

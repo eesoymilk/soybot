@@ -1,6 +1,9 @@
 # logs
 logs/
 
+# ./config.py
+/config.py
+
 # debugging files
 *_debug.py
 
