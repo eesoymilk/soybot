@@ -32,40 +32,6 @@ ugly_dogs_emojis = (
     '<:D86gaydog:982197038382985246>',
     '<:Dg8dog:1052636415260897360>',
 )
-emoji_bundle = (
-    '<:D11angrydog:946700998024515635>',
-    '<:D121notangrydog:976082704275763210>',
-    '<:D12angrydog_hat:991677468794703914>',
-    '<:D12angrydog_mag:953983783995068436>',
-    '<a:D12angrydog_rainbow:991676465764638810>',
-    '<a:D12angrydog_shake:991676443174129764>',
-    '<:D12angrydog_sleep:991677470216552620>',
-    '<:D12angrydog_starburst:991676592533295164>',
-    '<:B6PedoBearNiceLoli:780304160834584607>',
-    '<:B2ThumbUpCat:780338001539891210>',
-    '<:B3SadCat:780337984158957598>',
-    '<:B4CryCryCat:780311097546506270>',
-    '<:D21Mousy:793416980387332107>',
-    '<:D3LICKCAT:808580376230232085>',
-    '<:D4WTFCAT:993164888228757584>',
-    '<:D5NonChiwawa:791134356563034122>',
-    '<:D6AwkChiwawa:791134264842387496>',
-    '<:D7Chiwawa:958419880997171290>',
-    '<:D7MuchUglierChiwawa:1052637556388397167>',
-    '<:D7UglierChiwawa:1052638311539277844>',
-    '<:D86gaydog:982197038382985246>',
-    '<:D87dog:980870480804339712>',
-    '<:D8partydog:930768322226716672>',
-    '<:Dg8dog:1052636415260897360>',
-    '<a:Z2emoji_101:823383406728446016>',
-    '<:ayu_cat:989934658454183946>',
-    '<a:ayuhehehaha:1053433983066710096>',
-    '<:huskiwawa:1030424843050557480>',
-    '<:stand_left:1057511920908894298>',
-    '<:pusheen_dumpling:1025249866730962944>',
-    '<:tianblow:951370831232114690>',
-    '<:T_turdle:1024641964408320031>'
-)
 
 
 @app_commands.context_menu(name='憤怒狗狗')
@@ -90,18 +56,6 @@ async def ugly_dog_react(interaction: discord.Interaction, message: discord.Mess
         for emoji in ugly_dogs_emojis
     ))
     await interaction.followup.send(content='**醜狗醜醜**已送出')
-
-
-@app_commands.context_menu(name='表情大禮包')
-@app_commands.guilds(nthu_guild_id)
-@app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
-async def emoji_bundle_react(interaction: discord.Interaction, message: discord.Message):
-    await interaction.response.defer(ephemeral=True, thinking=True)
-    await asyncio.gather(*(
-        message.add_reaction(emoji)
-        for emoji in emoji_bundle
-    ))
-    await interaction.followup.send(content='**表情大禮包**已送出')
 
 
 class NthuCog(commands.Cog):
@@ -159,7 +113,6 @@ class NthuCog(commands.Cog):
 async def setup(bot: commands.Bot):
     bot.tree.add_command(angry_dog_react)
     bot.tree.add_command(ugly_dog_react)
-    bot.tree.add_command(emoji_bundle_react)
     await bot.add_cog(
         NthuCog(bot),
         guild=discord.Object(nthu_guild_id)
