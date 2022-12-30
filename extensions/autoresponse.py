@@ -34,7 +34,6 @@ KeywordResponses = tuple[tuple[str], Response]
 
 
 async def emojis_to_str(
-    collection,
     reactions: list[str | int],
     guild: discord.Guild
 ) -> list[str]:
@@ -80,7 +79,6 @@ async def fetch_author_responses(
         Response(
             feed['rate'],
             await emojis_to_str(
-                collection,
                 feed['responses'],
                 guild
             )
@@ -241,3 +239,4 @@ class AutoResponseGroup(app_commands.Group, name='soyfeed'):
 async def setup(bot: commands.Bot):
     await bot.add_cog(AutoResponseCog(bot))
     bot.tree.add_command(AutoResponseGroup())
+    log.info('loaded')

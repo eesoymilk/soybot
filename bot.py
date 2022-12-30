@@ -9,6 +9,7 @@ initial_extensions = (
     'extensions.autoresponse',
     'extensions.avatar',
     'extensions.emomix',
+    'extensions.waifu',
     'extensions.listeners',
     'extensions.poll',
     'extensions.soy_commands',
