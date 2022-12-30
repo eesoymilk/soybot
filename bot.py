@@ -1,7 +1,7 @@
 import aiohttp
 import discord
 from discord.ext.commands import Bot
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from discord import app_commands
 from utils import get_lumberjack
 
 log = get_lumberjack(__name__)
@@ -10,10 +10,11 @@ initial_extensions = (
     'extensions.avatar',
     'extensions.emomix',
     'extensions.listeners',
-    'extensions.lnmc',
     'extensions.poll',
     'extensions.soy_commands',
     'extensions.utilities',
+    'extensions.streak',
+    'extensions.nthu',
 )
 
 
@@ -28,6 +29,7 @@ class eeSoybot(Bot):
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
+        self.tree.on_error = self.on_app_command_error
         self.owner_id = self.bot_app_info.owner.id
 
         self.author_reactions = dict()
@@ -41,3 +43,14 @@ class eeSoybot(Bot):
     @property
     def owner(self) -> discord.User:
         return self.bot_app_info.owner
+
+    async def on_app_command_error(
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError
+    ):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            msg = f'冷卻中...\n請稍後**{str(round(error.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試'
+            await interaction.response.send_message(msg, ephemeral=True)
+        else:
+            log.exception(error)

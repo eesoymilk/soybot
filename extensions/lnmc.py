@@ -76,14 +76,14 @@ class LnmcCog(Cog):
 
     @commands.command()
     async def bt(self, ctx: Context):
-        if ctx.author.id != Config.users['soymilk'].id:
+        if ctx.author.id != self.bot.owner_id:
             return
 
         self.bulletin_msg = await ctx.send(embed=self.bulletin_embed())
 
     @app_commands.command()
     async def update_bulletin(self, interaction: Interaction):
-        if interaction.user.id != Config.users['soymilk'].id:
+        if interaction.user.id != self.bot.owner_id:
             await interaction.response.send_message('No Permission', ephemeral=True)
             return
 

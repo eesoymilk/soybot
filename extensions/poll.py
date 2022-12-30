@@ -9,7 +9,6 @@ from discord.app_commands import (
     Choice, Range,
 )
 from datetime import datetime
-from utils import Config
 from utils import get_lumberjack
 
 log = get_lumberjack(__name__)
@@ -332,8 +331,6 @@ class Poll:
         Choice(name='複選', value='multiple'),
     ]
 )
-# @guilds(Config.guilds['debug'].id)
-@guilds(*Config.guild_ids)
 @guild_only()
 async def poll_command(
     interaction: discord.Interaction,
