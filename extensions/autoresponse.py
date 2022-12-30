@@ -34,6 +34,7 @@ KeywordResponses = tuple[tuple[str], Response]
 
 
 async def emojis_to_str(
+    collection,
     reactions: list[str | int],
     guild: discord.Guild
 ) -> list[str]:
@@ -79,6 +80,7 @@ async def fetch_author_responses(
         Response(
             feed['rate'],
             await emojis_to_str(
+                collection,
                 feed['responses'],
                 guild
             )
@@ -102,6 +104,9 @@ class AutoResponseCog(commands.Cog):
 
     @commands.Cog.listener(name='on_message')
     async def react_author(self, message: discord.Message):
+        if message.author.bot:
+            return
+
         await fetch_author_responses(self.bot, message.guild)
 
         reaction = self.bot.author_reactions[message.guild.id].get(

@@ -1,4 +1,5 @@
 import asyncio
+import discord
 from pathlib import Path
 from discord.ext import commands
 
@@ -17,17 +18,17 @@ async def sync(ctx: commands.Context, prompt: str = None):
         return
 
     if prompt == 'nthu':
-        await ctx.bot.tree.sync(771595191638687784)
+        await ctx.bot.tree.sync(guild=discord.Object(771595191638687784))
         await ctx.send("commands synced to nthu guild")
 
     elif prompt == 'debug':
-        await ctx.bot.tree.sync(874556062815100938)
+        await ctx.bot.tree.sync(guild=discord.Object(874556062815100938))
         await ctx.send("commands synced to eeSoycord guild")
 
     elif prompt == 'test':
         await asyncio.gather(
-            ctx.bot.tree.sync(771595191638687784),
-            ctx.bot.tree.sync(874556062815100938)
+            ctx.bot.tree.sync(guild=discord.Object(771595191638687784)),
+            ctx.bot.tree.sync(guild=discord.Object(874556062815100938))
         )
         await ctx.send("commands synced to both nthu and eeSoycord guilds")
     else:
