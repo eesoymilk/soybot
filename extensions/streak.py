@@ -48,7 +48,6 @@ class MessageStreak:
             if random.random() <= 0.3:
                 await self.channel.send(random.choice([
                     '阿玉在洗版',
-                    '阿雪在洗版',
                     '度度在拉屎',
                     '這裡不是洗版區喔 注意一下'
                 ]))
