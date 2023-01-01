@@ -64,13 +64,16 @@ async def avatar(interaction: Interaction, target: Member):
     else:
         embed.set_image(url=avatar_url)
 
-    autoreaction = (await fetch_author_responses(interaction.client, interaction.guild)).get(target.id)
-
-    if autoreaction is not None:
-        embed.add_field(
-            name=f'自動表情 (觸發機率 {autoreaction.rate})',
-            value=' '.join(autoreaction.responses)
-        )
+    await fetch_author_responses(interaction.client, interaction.guild)
+    guild_author_reactions = interaction.client.author_reactions.get(
+        interaction.guild.id)
+    if guild_author_reactions is not None:
+        autoreaction = guild_author_reactions.get(target.id)
+        if autoreaction is not None:
+            embed.add_field(
+                name=f'自動表情 (觸發機率 {autoreaction.rate})',
+                value=' '.join(autoreaction.responses)
+            )
 
     await interaction.followup.send(embed=embed)
 
