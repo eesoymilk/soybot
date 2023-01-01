@@ -60,10 +60,6 @@ class Config:
             id=557591275227054090,
             soy_react=SoyReact(emoji_tags=('gay', 'ayu'),
                                activation_probability=0.4)),
-        'snow': User(
-            id=565862991061581835,
-            soy_react=SoyReact(emoji_tags=('gay',),
-                               activation_probability=0.3)),
         'paper': User(
             id=402060040518762497,
             soy_react=SoyReact(emoji_tags=('gay', 'ugly_dog'),
