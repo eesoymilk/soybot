@@ -559,7 +559,7 @@ class EmoListeners(Cog):
 
     @Cog.listener()
     async def on_message(self, msg: Message):
-        if not (msg.author.id == Config.users['dodo'].id and .05 > random.random()):
+        if not (msg.author.id == 618679878144753664 and .025 > random.random()):
             return
 
         while True:
