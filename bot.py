@@ -6,7 +6,7 @@ from utils import get_lumberjack
 
 log = get_lumberjack(__name__)
 initial_extensions = (
-    'extensions.autoresponse',
+    # 'extensions.autoresponse',
     'extensions.avatar',
     'extensions.emomix',
     'extensions.waifu',

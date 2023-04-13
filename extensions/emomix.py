@@ -1,6 +1,6 @@
 from asyncio.log import logger
 import random
-from discord import app_commands as ac, Interaction, Message
+from discord import app_commands, Interaction, Message
 from discord.app_commands import Group
 from discord.ext.commands import Bot, Cog
 from utils import get_lumberjack, Config
@@ -572,12 +572,12 @@ class EmoListeners(Cog):
         await msg.reply(result_url)
 
 
-@ac.guilds(*Config.guild_ids)
+@app_commands.guilds(*Config.guild_ids)
 class EmomixGroup(Group, name='emo'):
 
-    @ac.command(name='自己組合', description='唉唷欸欸表情可以自己組耶')
-    @ac.describe(emo1='請輸入一個表情符號，勿輸入其他多餘字元！', emo2='請輸入一個表情符號，勿輸入其他多餘字元！')
-    @ac.rename(emo1='第一個表情符號', emo2='第二個表情符號')
+    @app_commands.command(name='自己組合', description='唉唷欸欸表情可以自己組耶')
+    @app_commands.describe(emo1='請輸入一個表情符號，勿輸入其他多餘字元！', emo2='請輸入一個表情符號，勿輸入其他多餘字元！')
+    @app_commands.rename(emo1='第一個表情符號', emo2='第二個表情符號')
     async def emomix(self, interation: Interaction, emo1: str, emo2: str):
         try:
             codes = [emo_to_code_converter(emo1), emo_to_code_converter(emo2)]
@@ -597,7 +597,7 @@ class EmomixGroup(Group, name='emo'):
                 ephemeral=True
             )
 
-    @ac.command(name='度度', description='😳😳😳')
+    @app_commands.command(name='度度', description='😳😳😳')
     async def dodo_emo(self, interation: Interaction):
         await interation.response.defer()
         while True:
@@ -609,7 +609,7 @@ class EmomixGroup(Group, name='emo'):
 
         await interation.followup.send(result_url)
 
-    @ac.command(name='ㄨㄨㄒ', description='妳好漂亮')
+    @app_commands.command(name='ㄨㄨㄒ', description='妳好漂亮')
     async def dodo_koala(self, interation: Interaction):
         await interation.response.defer()
         while True:
@@ -623,6 +623,8 @@ class EmomixGroup(Group, name='emo'):
 
 
 async def setup(bot: Bot) -> None:
+    bot.emoji_kitchen = None
+
     bot.tree.add_command(EmomixGroup())
     await bot.add_cog(EmoListeners(bot))
     logger.info('EmoMix Commands Added')
