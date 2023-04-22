@@ -8,38 +8,35 @@ log = get_lumberjack(__name__)
 initial_extensions = (
     # 'extensions.autoresponse',
     'extensions.avatar',
-    'extensions.emomix',
-    'extensions.waifu',
+    # 'extensions.emomix',
+    # 'extensions.waifu',
     'extensions.listeners',
-    'extensions.poll',
+    'extensions.simple_poll',
+    # 'extensions.poll',
     'extensions.soy_commands',
     'extensions.utilities',
-    'extensions.streak',
-    'extensions.nthu',
+    # 'extensions.streak',
+    # 'extensions.nthu',
 )
 
 
-class eeSoybot(Bot):
+class Soybot(Bot):
     def __init__(self):
         super().__init__(
             command_prefix='!',
             case_insensitive=True,
-            intents=discord.Intents.all()
-        )
+            intents=discord.Intents.all())
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
         self.tree.on_error = self.on_app_command_error
-        self.owner_id = self.bot_app_info.owner.id
 
-        self.author_reactions = dict()
-
-        for extension in initial_extensions:
+        for ext in initial_extensions:
             try:
-                await self.load_extension(extension)
+                await self.load_extension(ext)
             except Exception as e:
-                log.exception('Failed to load extension %s.', extension)
+                log.exception(f'Failed to load extension {ext}.')
 
     @property
     def owner(self) -> discord.User:

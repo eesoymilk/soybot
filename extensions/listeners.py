@@ -1,93 +1,68 @@
-import discord
+from discord import Message, Reaction, Member
+from discord.ext.commands import Cog, Bot
+from discord.abc import Messageable
 from datetime import datetime
-from discord.ext import commands
-from utils import Config, ANSI, get_lumberjack
+from utils import get_lumberjack
+
+log = get_lumberjack(__name__)
 
 
-def rich_logging_formatter(guild, channel=None, display_name=None, receiver=None, emoji=None, content=None) -> str:
-    log_msg = ''
-
-    if guild is not None:
-        log_msg += f'{ANSI.BackgroundWhite}{ANSI.BrightBlack}{guild}{ANSI.Reset}'
-    if channel is not None:
-        log_msg += f'{ANSI.BackgroundWhite}{ANSI.BrightBlack} - {channel}{ANSI.Reset}'
-    if display_name is not None:
-        log_msg += f' {ANSI.Blue}{display_name}{ANSI.Reset}'
-    if receiver is not None:
-        log_msg += f'{ANSI.Blue} -> {receiver}{ANSI.Reset}'
-    if emoji is not None:
-        log_msg += f' {emoji}'
-    if content is not None:
-        log_msg += f': {content}'
-
-    return log_msg
-
-
-class Listeners(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+class Listeners(Cog):
+    def __init__(self, bot: Bot):
         self.bot = bot
-        self._last_member = None
-        self.logger = get_lumberjack('Listeners', ANSI.BrightGreen)
-        self.logger.info('initialized')
 
-    @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
-        # ignore own message
+    @Cog.listener()
+    async def on_message(self, msg: Message):
         if msg.author.id == self.bot.user.id:
             return
 
-        log_details = {
-            'guild': msg.guild.name,
-            'channel': msg.channel.name,
-            'display_name': msg.author.display_name,
-            'content': msg.content,
-        }
-        self.logger.info(rich_logging_formatter(**log_details))
+        log.info(f'{msg.guild} | {msg.channel} | {msg.author} | {msg.content}')
 
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        log_details = {
-            'guild': reaction.message.guild.name,
-            'channel': reaction.message.channel.name,
-            'display_name': user.display_name,
-            'receiver': reaction.message.author.display_name
-            if user.display_name != reaction.message.author.display_name else None,
-            'emoji': reaction.emoji,
-        }
-        self.logger.info(rich_logging_formatter(**log_details))
+    @Cog.listener()
+    async def on_reaction_add(self, rxn: Reaction, user: Member):
+        if user == self.bot.user:
+            return
 
-        # if reaction.count > 1 and self.bot.user.id not in [user.id async for user in reaction.users()]:
-        if reaction.count > 2:
-            await reaction.message.add_reaction(reaction)
+        log.info(' | '.join([
+            'on_reaction_add',
+            rxn.message.guild.name,
+            rxn.message.channel,
+            user,
+            rxn.emoji,
+            rxn.message.mentions
+        ]))
 
-    @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
-        log_details = {
-            'guild': reaction.message.guild.name,
-            'channel': reaction.message.channel.name,
-            'display_name': user.display_name,
-            'receiver': reaction.message.author.display_name
-            if user.display_name != reaction.message.author.display_name else None,
-            'emoji': reaction.emoji,
-        }
-        self.logger.info(rich_logging_formatter(**log_details))
+    @Cog.listener()
+    async def on_reaction_remove(self, rxn: Reaction, user: Member):
+        if user == self.bot.user:
+            return
 
-        if user.id == self.bot.user.id and reaction.message.guild.id == Config.guilds['nthu'].id:
-            await reaction.message.add_reaction(reaction)
+        log.info(' | '.join([
+            'on_reaction_remove',
+            rxn.message.guild.name,
+            rxn.message.channel,
+            user,
+            rxn.emoji,
+            rxn.message.mentions
+        ]))
 
-    @commands.Cog.listener()
-    async def on_typing(self, channel: discord.abc.Messageable, user: discord.Member, when: datetime):
+    @Cog.listener()
+    async def on_typing(
+        self,
+        ch: Messageable,
+        user: Member,
+        when: datetime
+    ):
         ...
 
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
+    @Cog.listener()
+    async def on_message_edit(self, before: datetime, after: datetime):
         ...
 
-    @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if after.id == self.bot.user.id:
-            await after.edit(nick=None)
+    @Cog.listener()
+    async def on_member_update(self, before: Member, after: Member):
+        ...
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: Bot):
     await bot.add_cog(Listeners(bot))

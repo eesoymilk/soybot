@@ -1,34 +1,41 @@
-import discord
-
-from discord import app_commands
-from discord.ext import commands
-from commands import starburst_stream
-from utils import ANSI
+from discord import app_commands as ac, Interaction, Embed
+from discord.ext.commands import Cog, Bot
 from utils import get_lumberjack
 
-log = get_lumberjack(__name__, ANSI.Yellow)
+log = get_lumberjack(__name__)
 
-
-class SoyCommands(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+class SoyCommands(Cog):
+    def __init__(self, bot: Bot):
         self.bot = bot
 
-    # Starburst Stream slash command
-    @app_commands.command(name="starburst", description='C8763')
-    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
-    async def starburst(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message(await starburst_stream())
+    @ac.command(name='匿名發言', description='匿名複讀機')
+    @ac.rename(msg='複讀內容')
+    @ac.checks.cooldown(1, 30, key=lambda i: (i.channel.id, i.user.id))
+    async def soy(self, intx: Interaction, msg: str):
+        await intx.channel.send(msg)
+        
+        await intx.response.send_message(
+            embed=Embed(
+                description=f'**已成功匿名傳送**',
+                color=intx.user.color,
+            ).add_field(
+                name='匿名訊息',
+                value=msg
+            ).add_field(
+                name='目標頻道',
+                value=intx.channel.mention
+            ).set_author(
+                name=intx.user,
+                icon_url=intx.user.avatar,
+            ).set_footer(
+                text='soybot is currently at beta.\n' +
+                'Please report bugs to eeSoymilk#4231 if you encounter any.'
+            ),
+            ephemeral=True)
 
-    @app_commands.command(description='用豆漿ㄐㄐ人說話ㄅ')
-    @app_commands.rename(message='讓豆漿ㄐㄐ人講的話')
-    @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 10.0, key=lambda i: (i.channel.id, i.user.id))
-    async def soy(self, interaction: discord.Interaction, message: str):
-        log.info(f'{interaction.user.display_name}: {message}')
-        await interaction.channel.send(message)
-        await interaction.response.send_message('已成功傳送', ephemeral=True)
+        log.info(f'{intx.user} | {intx.guild} | {intx.channel} | {msg}')
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: Bot):
     await bot.add_cog(SoyCommands(bot))
-    log.info('loaded')
+    log.info('extension loaded')
