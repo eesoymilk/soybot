@@ -1,7 +1,7 @@
 import aiohttp
-import discord
+from discord import User, Intents, Interaction
+from discord.app_commands import AppCommandError, CommandOnCooldown
 from discord.ext.commands import Bot
-from discord import app_commands
 from utils import get_lumberjack
 
 log = get_lumberjack(__name__)
@@ -21,11 +21,8 @@ initial_extensions = (
 
 
 class Soybot(Bot):
-    def __init__(self):
-        super().__init__(
-            command_prefix='!',
-            case_insensitive=True,
-            intents=discord.Intents.all())
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
@@ -39,16 +36,20 @@ class Soybot(Bot):
                 log.exception(f'Failed to load extension {ext}.')
 
     @property
-    def owner(self) -> discord.User:
+    def owner(self) -> User:
         return self.bot_app_info.owner
 
     async def on_app_command_error(
         self,
-        interaction: discord.Interaction,
-        error: app_commands.AppCommandError
+        intx: Interaction,
+        e: AppCommandError
     ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            msg = f'冷卻中...\n請稍後**{str(round(error.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試'
-            await interaction.response.send_message(msg, ephemeral=True)
+        if isinstance(e, CommandOnCooldown):
+            await intx.response.send_message(
+                '冷卻中...\n' +
+                '請稍後**' +
+                {str(round(e.retry_after, 1)).rstrip("0").rstrip(".")} +
+                '**秒再試', 
+                ephemeral=True)
         else:
-            log.exception(error)
+            log.exception(e)

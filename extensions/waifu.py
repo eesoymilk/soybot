@@ -1,23 +1,30 @@
-from asyncio.log import logger
-from datetime import datetime
-import discord
 import aiohttp
+
+from datetime import datetime
 from urllib.parse import urlencode, urlparse, urlunparse
-from discord import app_commands
-from discord.ext import commands
+from discord import (
+    app_commands as ac,
+    Interaction,
+    Embed,
+    Color,
+    ButtonStyle
+)
+from discord.app_commands import Choice, Group
+from discord.ext.commands import Bot
 from discord.ui import View, Button
 from utils import get_lumberjack
+from bot import Soybot
 
 logger = get_lumberjack('waifu')
-waifu_im_url = 'https://api.waifu.im/search/'
+waifu_im_api = 'https://api.waifu.im/'
 
 
 async def fetch_waifu(
     *,
-    tag: app_commands.Choice = None,
+    tag: Choice = None,
     is_nsfw: bool = False,
     many: bool = False
-) -> tuple[discord.Embed | list[discord.Embed], View]:
+) -> tuple[Embed | list[Embed], View]:
     query_seq = []
     if tag is not None:
         query_seq.append(('included_tags', tag.value))
@@ -26,7 +33,7 @@ async def fetch_waifu(
     if many:
         query_seq.append(('many', 'true'))
 
-    url_parts = list(urlparse(waifu_im_url))
+    url_parts = list(urlparse(waifu_im_api))
     url_parts[4] = urlencode(query_seq)
     url = urlunparse(url_parts)
 
@@ -39,10 +46,10 @@ async def fetch_waifu(
                 else:
                     image = data['images'][0]
                     tags = [t['name'] for t in image['tags']]
-                    embed = discord.Embed(
+                    embed = Embed(
                         title='隨機' if tag is None else tag.name,
                         description=''.join([f'#{t}' for t in tags]),
-                        color=discord.Color.from_str(image['dominant_color']),
+                        color=Color.from_str(image['dominant_color']),
                         timestamp=datetime.fromisoformat(image['uploaded_at']),
                     ).set_image(
                         url=image['url'],
@@ -50,7 +57,7 @@ async def fetch_waifu(
                         text='uploaded at',
                     )
                     view = View().add_item(Button(
-                        style=discord.ButtonStyle.link,
+                        style=ButtonStyle.link,
                         url=image['source'],
                         label='查看圖源',
                     ))
@@ -59,17 +66,17 @@ async def fetch_waifu(
                 raise
 
 
-class WaifuGroup(app_commands.Group, name='waifu'):
+class WaifuGroup(Group, name='waifu'):
 
-    @app_commands.command(
+    @ac.command(
         name='抽老婆',
-        description='聽說紙袋又換婆了?'
+        description='這我婆 那我婆 這個也我婆'
     )
-    @app_commands.describe(tag='你今天要哪種老婆')
-    @app_commands.rename(tag='老婆類型')
-    @app_commands.choices(
+    @ac.describe(tag='你今天要哪種老婆')
+    @ac.rename(tag='老婆類型')
+    @ac.choices(
         tag=[
-            app_commands.Choice(
+            Choice(
                 name=option,
                 value=tag_name
             ) for option, tag_name in {
@@ -84,26 +91,31 @@ class WaifuGroup(app_commands.Group, name='waifu'):
             }.items()
         ]
     )
-    @app_commands.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
-    async def sfw_coro(self, interaction: discord.Interaction, tag: app_commands.Choice[str] = None):
-        await interaction.response.defer(thinking=True)
+    @ac.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
+    async def sfw_coro(self, intx: Interaction, tag: Choice[str] = None):
+        await intx.response.defer(thinking=True)
+
+        bot: Soybot = intx.client
+        async with bot.session.get(waifu_im_api):
+            ...
+        
         try:
             embed, view = await fetch_waifu(tag=tag)
-            await interaction.followup.send(embed=embed, view=view)
+            await intx.followup.send(embed=embed, view=view)
         except:
-            await interaction.followup.send('醒 你沒老婆')
+            await intx.followup.send('醒 你沒老婆')
             raise
 
-    @app_commands.command(
+    @ac.command(
         name='可以色色',
-        description='社會性死亡注意!!!',
+        description='社會性死亡注意!',
         nsfw=True
     )
-    @app_commands.describe(tag='你今天想要哪種色色')
-    @app_commands.rename(tag='色色類型')
-    @app_commands.choices(
+    @ac.describe(tag='你今天想要哪種色色')
+    @ac.rename(tag='色色類型')
+    @ac.choices(
         tag=[
-            app_commands.Choice(
+            Choice(
                 name=option,
                 value=tag_name
             ) for option, tag_name in {
@@ -117,23 +129,23 @@ class WaifuGroup(app_commands.Group, name='waifu'):
             }.items()
         ]
     )
-    async def nsfw_coro(self, interaction: discord.Interaction, tag: app_commands.Choice[str] = None):
-        if not interaction.channel.nsfw:
-            await interaction.response.send_message(
+    async def nsfw_coro(self, intx: Interaction, tag: Choice[str] = None):
+        if not intx.channel.nsfw:
+            await intx.response.send_message(
                 '😡😡請勿在非限制級頻道色色 **BONK!**\n請至**限制級頻道**',
                 ephemeral=True
             )
             return
 
-        await interaction.response.defer(thinking=True)
+        await intx.response.defer(thinking=True)
         try:
             embed, view = await fetch_waifu(tag=tag, is_nsfw=True)
-            await interaction.followup.send(embed=embed, view=view)
+            await intx.followup.send(embed=embed, view=view)
         except:
-            await interaction.followup.send('不可以色色')
+            await intx.followup.send('不可以色色')
             raise
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: Bot) -> None:
     bot.tree.add_command(WaifuGroup())
     logger.info('loaded')

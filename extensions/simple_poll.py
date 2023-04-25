@@ -1,13 +1,11 @@
 import asyncio
+
 from discord import (
     app_commands as ac, 
     Interaction,
     Embed,
-    Color,
-    Message,
-    Member,
     TextStyle)
-from discord.ext.commands import Cog, Bot
+from discord.ext.commands import Bot
 from discord.ui import Modal, TextInput
 from utils import get_lumberjack
 
@@ -15,18 +13,10 @@ log = get_lumberjack(__name__)
 
 class SimplePollModal(Modal, title='Simple Reaction Poll'):
 
-    poll_reactions = {
-        1: '1️⃣',
-        2: '2️⃣',
-        3: '3️⃣',
-        4: '4️⃣',
-        5: '5️⃣',
-        6: '6️⃣',
-        7: '7️⃣',
-        8: '8️⃣',
-        9: '9️⃣',
-        10: '🔟'
-    }
+    poll_reactions = (
+        '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
+        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'
+    )
 
     form_title = TextInput(
         label='投票標題',
@@ -37,17 +27,18 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
     form_description = TextInput(
         label='投票說明',
         placeholder='非必填',
-        required=False,
         # default='Test Poll Description',
+        required=False,
     )
 
     form_options = TextInput(
-        label='投票選項 (一選項換一行、選項數量需介於2至25之間、單一選項不得超過100字元)',
+        label='投票選項 (一個選項換一行)',
         style=TextStyle.long,
         # placeholder='Poll Options',
         default='Yes\nNo',
     )
 
+    # TODO: options validation
     async def on_submit(self, intx: Interaction):
         log.info(f'{intx.user}\'s Modal received.')
 
@@ -55,8 +46,15 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
         description = self.form_description.value.strip()
         options = []
         for option in self.form_options.value.split('\n'):
-            if option not in options:
-                options.append(option)
+            if option in options:
+                continue
+            options.append(option)
+        
+        if (length := len(options)) < 2:
+            await intx.response.send_message(
+                f'**cannot make a poll with {length} option(s)**',
+                ephemeral=True)
+            return
 
         embed = Embed(
             color=intx.user.color,
@@ -66,9 +64,10 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
             name=f'由 {intx.user.display_name} 發起的投票',
             icon_url=intx.user.display_avatar
         ).set_footer(
-            text='soybot is currently at beta.\nPlease report bugs to eeSoymilk#4231 if you encounter any.'
+            text='soybot is currently at beta.\n' +
+                 'Please report bugs to eeSoymilk#4231 if you encounter any.'
         )
-        for rxn ,option in zip(self.poll_reactions.values(), options):
+        for rxn ,option in zip(self.poll_reactions, options):
             embed.add_field(name=rxn, value=option)
 
         await intx.response.send_message(embed=embed)
@@ -76,8 +75,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
         poll_msg = await intx.original_response()
         await asyncio.gather(*[
             poll_msg.add_reaction(rxn)
-            for rxn ,_ in zip(self.poll_reactions.values(), options)
-        ])
+            for rxn ,_ in zip(self.poll_reactions, options)])
         
         log.info(f'{intx.user}\'s poll started.')
 
