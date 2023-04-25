@@ -1,8 +1,10 @@
 import asyncio
 import discord
-from bot import Soybot
 from pathlib import Path
 from discord.ext.commands import command, Context, Bot
+from utils import get_lumberjack
+
+log = get_lumberjack(__name__)
 
 
 # sync commands
@@ -50,6 +52,7 @@ async def reload(ctx: Context, query: str = None):
     await ctx.send(f'**{", ".join(exts)}** reloaded')
 
 
-async def setup(bot: Soybot):
+async def setup(bot: Bot):
     bot.add_command(sync)
     bot.add_command(reload)
+    log.info(f'{__name__} loaded')

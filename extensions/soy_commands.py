@@ -1,6 +1,6 @@
 from discord import app_commands as ac, Interaction, Embed
 from discord.ext.commands import Cog, Bot
-from utils import get_lumberjack
+from utils import get_lumberjack, cd_but_soymilk
 
 log = get_lumberjack(__name__)
 
@@ -10,7 +10,7 @@ class SoyCommands(Cog):
 
     @ac.command(name='匿名發言', description='匿名複讀機')
     @ac.rename(msg='複讀內容')
-    @ac.checks.cooldown(1, 30, key=lambda i: (i.channel.id, i.user.id))
+    @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def soy(self, intx: Interaction, msg: str):
         await intx.channel.send(msg)
         
@@ -38,4 +38,4 @@ class SoyCommands(Cog):
 
 async def setup(bot: Bot):
     await bot.add_cog(SoyCommands(bot))
-    log.info('extension loaded')
+    log.info(f'{__name__} loaded')

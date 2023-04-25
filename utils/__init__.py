@@ -1,2 +1,2 @@
-from utils.config import *
+from utils.cd import *
 from utils.lumberjack import *

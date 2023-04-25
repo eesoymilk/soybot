@@ -9,7 +9,7 @@ initial_extensions = (
     # 'extensions.autoresponse',
     'extensions.avatar',
     # 'extensions.emomix',
-    # 'extensions.waifu',
+    'extensions.waifu',
     'extensions.listeners',
     'extensions.simple_poll',
     # 'extensions.poll',
@@ -46,10 +46,7 @@ class Soybot(Bot):
     ):
         if isinstance(e, CommandOnCooldown):
             await intx.response.send_message(
-                '冷卻中...\n' +
-                '請稍後**' +
-                {str(round(e.retry_after, 1)).rstrip("0").rstrip(".")} +
-                '**秒再試', 
+                f'冷卻中...\n請稍後**{str(round(e.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試', 
                 ephemeral=True)
         else:
             log.exception(e)

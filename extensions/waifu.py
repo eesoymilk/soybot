@@ -12,59 +12,11 @@ from discord import (
 from discord.app_commands import Choice, Group
 from discord.ext.commands import Bot
 from discord.ui import View, Button
-from utils import get_lumberjack
+from utils import get_lumberjack, cd_but_soymilk
 from bot import Soybot
 
-logger = get_lumberjack('waifu')
-waifu_im_api = 'https://api.waifu.im/'
-
-
-async def fetch_waifu(
-    *,
-    tag: Choice = None,
-    is_nsfw: bool = False,
-    many: bool = False
-) -> tuple[Embed | list[Embed], View]:
-    query_seq = []
-    if tag is not None:
-        query_seq.append(('included_tags', tag.value))
-    if is_nsfw:
-        query_seq.append(('is_nsfw', 'true'))
-    if many:
-        query_seq.append(('many', 'true'))
-
-    url_parts = list(urlparse(waifu_im_api))
-    url_parts[4] = urlencode(query_seq)
-    url = urlunparse(url_parts)
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            data = await resp.json()
-            try:
-                if many:
-                    ...
-                else:
-                    image = data['images'][0]
-                    tags = [t['name'] for t in image['tags']]
-                    embed = Embed(
-                        title='隨機' if tag is None else tag.name,
-                        description=''.join([f'#{t}' for t in tags]),
-                        color=Color.from_str(image['dominant_color']),
-                        timestamp=datetime.fromisoformat(image['uploaded_at']),
-                    ).set_image(
-                        url=image['url'],
-                    ).set_footer(
-                        text='uploaded at',
-                    )
-                    view = View().add_item(Button(
-                        style=ButtonStyle.link,
-                        url=image['source'],
-                        label='查看圖源',
-                    ))
-                    return embed, view
-            except KeyError:
-                raise
-
+log = get_lumberjack('waifu')
+waifu_im_api = 'https://api.waifu.im'
 
 class WaifuGroup(Group, name='waifu'):
 
@@ -91,20 +43,44 @@ class WaifuGroup(Group, name='waifu'):
             }.items()
         ]
     )
-    @ac.checks.cooldown(1, 30.0, key=lambda i: (i.channel.id, i.user.id))
+    @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def sfw_coro(self, intx: Interaction, tag: Choice[str] = None):
         await intx.response.defer(thinking=True)
+        
+        if tag is not None:
+            title = tag.name
+            url = f'{waifu_im_api}/search?included_tags={tag.value}'
+        else:
+            title = '隨機'
+            url = f'{waifu_im_api}/search'
 
         bot: Soybot = intx.client
-        async with bot.session.get(waifu_im_api):
-            ...
+        async with bot.session.get(url) as resp:
+            data = await resp.json()
+            try:
+                image = data['images'][0]
+                tags = [t['name'] for t in image['tags']]
+            except KeyError:
+                await intx.followup.send('醒 你沒老婆')
+                return
         
-        try:
-            embed, view = await fetch_waifu(tag=tag)
-            await intx.followup.send(embed=embed, view=view)
-        except:
-            await intx.followup.send('醒 你沒老婆')
-            raise
+        await intx.followup.send(
+            embed=Embed(
+                title=title,
+                description=''.join([f'#{t}' for t in tags]),
+                color=Color.from_str(image['dominant_color']),
+                timestamp=datetime.fromisoformat(image['uploaded_at']),
+            ).set_image(
+                url=image['url'],
+            ).set_footer(
+                text='uploaded at'
+            ),
+            view=View().add_item(Button(
+                style=ButtonStyle.link,
+                url=image['source'],
+                label='查看圖源',
+            ))
+        )
 
     @ac.command(
         name='可以色色',
@@ -129,23 +105,53 @@ class WaifuGroup(Group, name='waifu'):
             }.items()
         ]
     )
+    @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def nsfw_coro(self, intx: Interaction, tag: Choice[str] = None):
         if not intx.channel.nsfw:
             await intx.response.send_message(
-                '😡😡請勿在非限制級頻道色色 **BONK!**\n請至**限制級頻道**',
-                ephemeral=True
-            )
+                '😡😡請勿在非限制級頻道色色 **BONK!**\n' + 
+                '請至**限制級頻道**',
+                ephemeral=True)
             return
-
+        
         await intx.response.defer(thinking=True)
-        try:
-            embed, view = await fetch_waifu(tag=tag, is_nsfw=True)
-            await intx.followup.send(embed=embed, view=view)
-        except:
-            await intx.followup.send('不可以色色')
-            raise
+        
+        url = f'{waifu_im_api}/search?is_nsfw=true'
+        if tag is not None:
+            title = tag.name
+            url += f'&included_tags={tag.value}'
+        else:
+            title = '隨機'
+
+        bot: Soybot = intx.client
+        async with bot.session.get(url) as resp:
+            data = await resp.json()
+            try:
+                image = data['images'][0]
+                tags = [t['name'] for t in image['tags']]
+            except KeyError:
+                await intx.followup.send('醒 你沒老婆')
+                return
+        
+        await intx.followup.send(
+            embed=Embed(
+                title=title,
+                description=''.join([f'#{t}' for t in tags]),
+                color=Color.from_str(image['dominant_color']),
+                timestamp=datetime.fromisoformat(image['uploaded_at']),
+            ).set_image(
+                url=image['url'],
+            ).set_footer(
+                text='uploaded at'
+            ),
+            view=View().add_item(Button(
+                style=ButtonStyle.link,
+                url=image['source'],
+                label='查看圖源',
+            ))
+        )
 
 
-async def setup(bot: Bot) -> None:
+async def setup(bot: Bot):
     bot.tree.add_command(WaifuGroup())
-    logger.info('loaded')
+    log.info(f'{__name__} loaded')

@@ -16,7 +16,11 @@ class Listeners(Cog):
         if msg.author.id == self.bot.user.id:
             return
 
-        log.info(f'{msg.guild} | {msg.channel} | {msg.author} | {msg.content}')
+        log.info(' | '.join([
+            f'{msg.guild}',
+            f'{msg.channel}',
+            f'{msg.author}',
+            msg.content]))
 
     @Cog.listener()
     async def on_reaction_add(self, rxn: Reaction, user: Member):
@@ -24,13 +28,11 @@ class Listeners(Cog):
             return
 
         log.info(' | '.join([
-            'on_reaction_add',
-            rxn.message.guild.name,
-            rxn.message.channel,
-            user,
-            rxn.emoji,
-            rxn.message.mentions
-        ]))
+            f'{rxn.message.guild}',
+            f'{rxn.message.channel}',
+            f'{user}',
+            f'{rxn.emoji}',
+            rxn.message.jump_url]))
 
     @Cog.listener()
     async def on_reaction_remove(self, rxn: Reaction, user: Member):
@@ -38,13 +40,11 @@ class Listeners(Cog):
             return
 
         log.info(' | '.join([
-            'on_reaction_remove',
-            rxn.message.guild.name,
-            rxn.message.channel,
-            user,
-            rxn.emoji,
-            rxn.message.mentions
-        ]))
+            f'{rxn.message.guild}',
+            f'{rxn.message.channel}',
+            f'{user}',
+            f'{rxn.emoji}',
+            rxn.message.jump_url]))
 
     @Cog.listener()
     async def on_typing(
@@ -56,8 +56,12 @@ class Listeners(Cog):
         ...
 
     @Cog.listener()
-    async def on_message_edit(self, before: datetime, after: datetime):
-        ...
+    async def on_message_edit(self, before: Message, after: Message):
+        log.info(' | '.join([
+            f'{before.guild}',
+            f'{before.channel}',
+            f'{before.author}',
+            f'{before.content} -> {after.content}']))
 
     @Cog.listener()
     async def on_member_update(self, before: Member, after: Member):
@@ -66,3 +70,4 @@ class Listeners(Cog):
 
 async def setup(bot: Bot):
     await bot.add_cog(Listeners(bot))
+    log.info(f'{__name__} loaded')
