@@ -12,4 +12,5 @@ motor==3.1.2
 multidict==6.0.4
 pycodestyle==2.10.0
 pymongo==4.3.3
+python-dotenv==1.0.0
 yarl==1.9.1
