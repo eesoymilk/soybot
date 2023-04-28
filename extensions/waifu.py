@@ -1,7 +1,6 @@
-import aiohttp
-
 from datetime import datetime
-from urllib.parse import urlencode, urlparse, urlunparse
+from aiohttp import ClientSession
+
 from discord import (
     app_commands as ac,
     Interaction,
@@ -12,11 +11,43 @@ from discord import (
 from discord.app_commands import Choice, Group
 from discord.ext.commands import Bot
 from discord.ui import View, Button
+
 from utils import get_lumberjack, cd_but_soymilk
 from bot import Soybot
 
 log = get_lumberjack('waifu')
 waifu_im_api = 'https://api.waifu.im'
+
+
+async def fetch_waifu(session: ClientSession, url: str) -> dict:
+    async with session.get(url) as resp:
+        data = await resp.json()
+
+    try:
+        image = data['images'][0]
+        return image
+    except KeyError:
+        raise
+
+def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
+    tags = [t['name'] for t in image['tags']]
+    embed = Embed(
+        title=title,
+        description=''.join([f'#{t}' for t in tags]),
+        color=Color.from_str(image['dominant_color']),
+        timestamp=datetime.fromisoformat(image['uploaded_at']),
+    ).set_image(
+        url=image['url'],
+    ).set_footer(
+        text='uploaded at'
+    )
+    view = View().add_item(Button(
+        style=ButtonStyle.link,
+        url=image['source'],
+        label='查看圖源',
+    ))
+    
+    return embed, view
 
 class WaifuGroup(Group, name='waifu'):
 
@@ -55,32 +86,15 @@ class WaifuGroup(Group, name='waifu'):
             url = f'{waifu_im_api}/search'
 
         bot: Soybot = intx.client
-        async with bot.session.get(url) as resp:
-            data = await resp.json()
-            try:
-                image = data['images'][0]
-                tags = [t['name'] for t in image['tags']]
-            except KeyError:
-                await intx.followup.send('醒 你沒老婆')
-                return
+        try:
+            image = await fetch_waifu(bot.session, url)
+        except KeyError:
+            await intx.followup.send('醒 你沒老婆')
+            return
         
-        await intx.followup.send(
-            embed=Embed(
-                title=title,
-                description=''.join([f'#{t}' for t in tags]),
-                color=Color.from_str(image['dominant_color']),
-                timestamp=datetime.fromisoformat(image['uploaded_at']),
-            ).set_image(
-                url=image['url'],
-            ).set_footer(
-                text='uploaded at'
-            ),
-            view=View().add_item(Button(
-                style=ButtonStyle.link,
-                url=image['source'],
-                label='查看圖源',
-            ))
-        )
+        embed, view = build_waifu_embed_view(title, image)
+
+        await intx.followup.send(embed=embed, view=view)
 
     @ac.command(
         name='可以色色',
@@ -124,32 +138,15 @@ class WaifuGroup(Group, name='waifu'):
             title = '隨機'
 
         bot: Soybot = intx.client
-        async with bot.session.get(url) as resp:
-            data = await resp.json()
-            try:
-                image = data['images'][0]
-                tags = [t['name'] for t in image['tags']]
-            except KeyError:
-                await intx.followup.send('醒 你沒老婆')
-                return
+        try:
+            image = await fetch_waifu(bot.session, url)
+        except KeyError:
+            await intx.followup.send('不可以色色')
+            return
         
-        await intx.followup.send(
-            embed=Embed(
-                title=title,
-                description=''.join([f'#{t}' for t in tags]),
-                color=Color.from_str(image['dominant_color']),
-                timestamp=datetime.fromisoformat(image['uploaded_at']),
-            ).set_image(
-                url=image['url'],
-            ).set_footer(
-                text='uploaded at'
-            ),
-            view=View().add_item(Button(
-                style=ButtonStyle.link,
-                url=image['source'],
-                label='查看圖源',
-            ))
-        )
+        embed, view = build_waifu_embed_view(title, image)
+
+        await intx.followup.send(embed=embed, view=view)
 
 
 async def setup(bot: Bot):

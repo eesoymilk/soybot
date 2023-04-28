@@ -1,6 +1,6 @@
 import os
 import logging
-from logging import getLogger, Logger, Formatter, StreamHandler
+from logging import Logger, Formatter, StreamHandler
 from logging.handlers import RotatingFileHandler
 
 
@@ -12,7 +12,7 @@ def get_lumberjack(
     if not os.path.exists('logs'):
         os.makedirs('logs')
 
-    logger = getLogger(name)
+    logger = logging.getLogger(name)
     if not logger.propagate:
         return logger
 

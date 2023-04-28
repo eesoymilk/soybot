@@ -15,6 +15,7 @@ initial_extensions = (
     # 'extensions.poll',
     'extensions.soy_commands',
     'extensions.utilities',
+    'extensions.custom_emoji_stats',
     # 'extensions.streak',
     # 'extensions.nthu',
 )

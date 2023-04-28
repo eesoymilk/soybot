@@ -1,13 +1,20 @@
-import discord
 import asyncio
 
-from discord import ui
-from discord import app_commands
-from discord.ext import commands
-from discord.app_commands import (
-    guilds, describe, rename, choices, guild_only,
-    Choice, Range,
+from discord import (
+    app_commands as ac,
+    Embed,
+    TextStyle,
+    Color, 
+    Interaction,
+    Message,
+    Member,
+    SelectOption,
+    ButtonStyle
 )
+from discord.ui import Modal, Select, View, Button, TextInput
+from discord.app_commands import Choice, Range
+from discord.ext.commands import Bot
+
 from datetime import datetime
 from utils import get_lumberjack
 
@@ -26,7 +33,7 @@ def join_str(l: list[str], sep='', bold=False, italic=False) -> str:
 
 
 def poll_result_embed(poll):
-    embed = discord.Embed(
+    embed = Embed(
         color=poll.color,
         title=f'投票結果 - **{poll.title}**',
         description=join_str(list(poll.description.values())[:-1]),
@@ -109,24 +116,24 @@ def validate_form(title: str, options: list[str]) -> list[str]:
     return errors
 
 
-class PollDetails(ui.Modal):
+class PollDetails(Modal):
 
-    form_title = ui.TextInput(
+    form_title = TextInput(
         label='投票標題',
         # placeholder='Poll Title',
         # default='Test Poll',
     )
 
-    form_description = ui.TextInput(
+    form_description = TextInput(
         label='投票說明',
         placeholder='非必填',
         required=False,
         # default='Test Poll',
     )
 
-    form_options = ui.TextInput(
+    form_options = TextInput(
         label='投票選項 (一選項換一行、選項數量需介於2至25之間、單一選項不得超過100字元)',
-        style=discord.TextStyle.long,
+        style=TextStyle.long,
         # placeholder='Poll Options',
         default='Yes\nNo',
     )
@@ -140,7 +147,7 @@ class PollDetails(ui.Modal):
             f'{self.poll.chat_interaction.user.display_name}\'s Modal timeout'
         )
 
-    async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: Interaction):
         log.info(
             f'{self.poll.chat_interaction.user.display_name}\'s Modal received.'
         )
@@ -162,13 +169,13 @@ class PollDetails(ui.Modal):
             )
             return
         self.poll.modal_interaction = interaction
-        self.poll.color = discord.Color.random()
+        self.poll.color = Color.random()
         self.poll.pools = {option: set() for option in self.poll.options}
         self.poll.voters = set()
 
         # setup the view and embed for the poll in advanced
         self.poll.poll_view = PollView(self.poll)
-        self.poll.poll_embed = discord.Embed(
+        self.poll.poll_embed = Embed(
             color=self.poll.color,
             title=f'投票開始 - **{self.poll.title}**',
             # description=f'{self.poll.description["anonymity"]}{self.poll.description["format"]}\n限時{self.poll.duration}秒',
@@ -187,7 +194,7 @@ class PollDetails(ui.Modal):
         # stop the view so that the coro proceed
         self.stop()
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(self, interaction: Interaction, error: Exception) -> None:
         log.exception(error)
         await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
         # Make sure we know what the error actually is
@@ -195,12 +202,12 @@ class PollDetails(ui.Modal):
         ...
 
 
-class PollSelect(ui.Select):
+class PollSelect(Select):
     def __init__(self, poll) -> None:
         self.poll = poll
         placeholder = f'開始投票 - {poll.title}'
         max_values = 1 if poll.is_single else len(poll.options)
-        options = [discord.SelectOption(label=option)
+        options = [SelectOption(label=option)
                    for option in poll.options]
         super().__init__(
             placeholder=placeholder,
@@ -208,7 +215,7 @@ class PollSelect(ui.Select):
             options=options
         )
 
-    async def callback(self, interaction: discord.Interaction) -> None:
+    async def callback(self, interaction: Interaction) -> None:
         log.info(
             f'{self.poll.title} | {interaction.user.display_name} | {join_str(self.values, sep=", ")}'
         )
@@ -234,7 +241,7 @@ class PollSelect(ui.Select):
         )
 
 
-class PollView(ui.View):
+class PollView(View):
     def __init__(self, poll):
         super().__init__()
         self.add_item(PollSelect(poll))
@@ -246,7 +253,7 @@ class PollView(ui.View):
 class Poll:
     def __init__(
         self,
-        chat_interaction: discord.Interaction,
+        chat_interaction: Interaction,
         is_public: bool,
         is_single: bool,
         duration: float
@@ -255,17 +262,17 @@ class Poll:
         self.is_public = is_public
         self.is_single = is_single
         self.duration = duration
-        self.modal: ui.Modal = PollDetails(self)
+        self.modal: Modal = PollDetails(self)
 
-        self.modal_interaction: discord.Interaction
-        self.color: discord.Color
+        self.modal_interaction: Interaction
+        self.color: Color
         self.title: str
-        self.poll_view: ui.View
-        self.poll_embed: discord.Embed
-        self.poll_message: discord.Message
-        self.res_message: discord.Message
-        self.pools: dict[str, set[discord.Member]]
-        self.voters: set[discord.Member]
+        self.poll_view: View
+        self.poll_embed: Embed
+        self.poll_message: Message
+        self.res_message: Message
+        self.pools: dict[str, set[Member]]
+        self.voters: set[Member]
 
         log.info(
             f'A Poll instance is created for {chat_interaction.user.display_name}'
@@ -302,8 +309,8 @@ class Poll:
         log.debug(f'{self.title} | result embed generated')
 
         # edit poll message
-        self.poll_view.clear_items().add_item(ui.Button(
-            style=discord.ButtonStyle.link,
+        self.poll_view.clear_items().add_item(Button(
+            style=ButtonStyle.link,
             url=self.res_message.jump_url,
             label='查看投票結果',
         ))
@@ -318,10 +325,10 @@ class Poll:
         log.info(f'{self.title} | ended')
 
 
-@app_commands.command(name="poll", description='發起投票吧！')
-@describe(duration='預設為20秒 (限制為10到180秒)')
-@rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
-@choices(
+@ac.command(name="poll", description='發起投票吧！')
+@ac.describe(duration='預設為20秒 (限制為10到180秒)')
+@ac.rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
+@ac.choices(
     anonymity=[
         Choice(name='公開', value='public'),
         Choice(name='匿名', value='anonymous'),
@@ -331,9 +338,9 @@ class Poll:
         Choice(name='複選', value='multiple'),
     ]
 )
-@guild_only()
+@ac.guild_only()
 async def poll_command(
-    interaction: discord.Interaction,
+    interaction: Interaction,
     anonymity: Choice[str],
     format: Choice[str],
     duration: Range[float, 10, 180] = 20.0
@@ -355,5 +362,5 @@ async def poll_command(
     await poll.end()
 
 
-async def setup(bot: commands.Bot) -> None:
+async def setup(bot: Bot) -> None:
     bot.tree.add_command(poll_command)
