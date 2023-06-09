@@ -33,5 +33,9 @@ jobs:
           registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           registry-username: ${{ secrets.REGISTRY_USERNAME }}
           registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-          name: aci-app
+          secure-environment-variables: |
+            TOKEN=${{ secrets.TOKEN }}
+            MONGODB_CONNECTION_STR=${{ secrets.MONGODB_CONNECTION_STR }}
+            OPENAI_API_KEY=${{ secrets.MONGODB_CONNECTION_STR }}
+          name: soybot-aci-app
           location: "east asia"
