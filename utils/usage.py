@@ -1,6 +1,6 @@
 import abc
-import asyncio
 
+from typing import Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -40,7 +40,7 @@ class BaseUsage(abc.ABC):
 
 @dataclass(slots=True)
 class EmojiUsage(BaseUsage):
-    usage_type: EmojiUsageType
+    usage_type: Optional[EmojiUsageType] = None  # Default value
 
     @property
     def emoji(self) -> Emoji:
@@ -54,8 +54,7 @@ class EmojiUsage(BaseUsage):
             channel_id=msg.channel.id,
             message_id=msg.id,
             timestamp=msg.created_at,
-            usage_type=EmojiUsageType.IN_TEXT,
-        )
+            usage_type=EmojiUsageType.IN_TEXT)
 
     @classmethod
     def from_on_reaction(cls, rxn: Reaction, user: Member):
@@ -64,21 +63,19 @@ class EmojiUsage(BaseUsage):
             user_id=user.id,
             channel_id=rxn.message.channel.id,
             message_id=rxn.message.id,
-            usage_type=EmojiUsageType.REACTION,
-        )
+            usage_type=EmojiUsageType.REACTION)
 
 
 @dataclass(slots=True)
 class StickerUsage(BaseUsage):
 
     @property
-    def emoji(self) -> Sticker:
+    def sticker(self) -> Sticker:
         return self._item
 
     @classmethod
-    def from_event(cls, event):
+    def from_message(cls, msg: Message):
         return cls(
-            user_id=event.author.id,
-            channel_id=event.channel.id,
-            sticker=event.sticker
-        )
+            user_id=msg.author.id,
+            channel_id=msg.channel.id,
+            sticker=msg.sticker)

@@ -21,8 +21,9 @@ class CustomEmojiStatsCog(Cog):
     async def in_text_emojis(self, msg: Message):
 
         partial_emojis = [
-            PartialEmoji.from_str(match.group()) for match in re.finditer(
-                emoji_regex, msg.content)]
+            PartialEmoji.from_str(
+                match.group()
+            ) for match in re.finditer(emoji_regex, msg.content)]
 
         results = await asyncio.gather(*[
             msg.guild.fetch_emoji(e.id) for e in partial_emojis

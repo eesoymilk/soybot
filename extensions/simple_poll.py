@@ -15,8 +15,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
 
     poll_reactions = (
         '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
-        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'
-    )
+        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟')
 
     form_title = TextInput(
         label='投票標題',
@@ -28,15 +27,13 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
         label='投票說明',
         placeholder='非必填',
         # default='Test Poll Description',
-        required=False,
-    )
+        required=False,)
 
     form_options = TextInput(
         label='投票選項 (一個選項換一行)',
         style=TextStyle.long,
         # placeholder='Poll Options',
-        default='Yes\nNo',
-    )
+        default='Yes\nNo',)
 
     # TODO: options validation
     async def on_submit(self, intx: Interaction):
