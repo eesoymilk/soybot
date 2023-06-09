@@ -14,11 +14,11 @@ A discord bot written in `discord.py` by eesoymilk.
 ## Run the bot locally
 
 1. Setup `.env`
-  ```
-  TOKEN=<your_bot_token_here>
-  MONGODB_CONNECTION_STR=<your_mongodb_connection_string_here>
-  OPENAI_API_KEY=<your_openai_api_key_here>
-  ```
+    ```
+    TOKEN=<your_bot_token_here>
+    MONGODB_CONNECTION_STR=<your_mongodb_connection_string_here>
+    OPENAI_API_KEY=<your_openai_api_key_here>
+    ```
 
 1. Build and run
 
