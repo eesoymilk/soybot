@@ -20,7 +20,7 @@ async def avatar(intx: Interaction, target: Member | User):
         name=target,
         icon_url=target.avatar,
     ).set_footer(
-        text='soybot is currently at beta.\nPlease report bugs to eeSoymilk#4231 if you encounter any.'
+        text='soybot is currently in beta.\nPlease report bugs to eesoymilk if you encounter any.'
     )
 
     fetched_target = await intx.client.fetch_user(target.id)

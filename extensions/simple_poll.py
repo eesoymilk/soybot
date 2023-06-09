@@ -15,24 +15,20 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
 
     poll_reactions = (
         '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
-        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟')
+        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟',)
 
     form_title = TextInput(
         label='投票標題',
-        # placeholder='Poll Title',
-        # default='Test Poll',
     )
 
     form_description = TextInput(
         label='投票說明',
         placeholder='非必填',
-        # default='Test Poll Description',
         required=False,)
 
     form_options = TextInput(
         label='投票選項 (一個選項換一行)',
         style=TextStyle.long,
-        # placeholder='Poll Options',
         default='Yes\nNo',)
 
     # TODO: options validation
@@ -77,7 +73,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
         log.info(f'{intx.user}\'s poll started.')
 
 
-@ac.command(name='簡易投票', description='用表情符號反應來進行投票')
+@ac.command(name='poll', description='reaction poll')
 @ac.guild_only()
 @ac.checks.cooldown(1, 60, key=lambda i: (i.channel.id, i.user.id))
 async def simple_poll(intx: Interaction):

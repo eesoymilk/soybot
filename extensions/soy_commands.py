@@ -29,9 +29,10 @@ class SoyCommands(Cog):
                 icon_url=intx.user.avatar,
             ).set_footer(
                 text='soybot is currently at beta.\n' +
-                'Please report bugs to eeSoymilk#4231 if you encounter any.'
+                'Please report bugs to eesoymilk if you encounter any.'
             ),
-            ephemeral=True)
+            ephemeral=True
+        )
 
         log.info(f'{intx.user} | {intx.guild} | {intx.channel} | {msg}')
 

@@ -1,13 +1,10 @@
 import abc
 
-from typing import Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-
 from discord import Emoji, Sticker, Message, Reaction, Member
-
 
 custom_emoji_regex = r'<(a?):([a-zA-Z0-9_]{2,32}):([0-9]{18,22})>'
 
@@ -23,7 +20,7 @@ class BaseUsage(abc.ABC):
     user_id: int
     channel_id: int
     message_id: int
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime
 
     @property
     def id(self):
@@ -40,21 +37,22 @@ class BaseUsage(abc.ABC):
 
 @dataclass(slots=True)
 class EmojiUsage(BaseUsage):
-    usage_type: Optional[EmojiUsageType] = None  # Default value
+    usage_type: EmojiUsageType
 
     @property
     def emoji(self) -> Emoji:
         return self._item
 
     @classmethod
-    def from_in_text_custom_emoji(cls, emoji: Emoji, msg: Message):
+    def from_in_text_emoji(cls, emoji: Emoji, msg: Message):
         return cls(
             _item=emoji,
             user_id=msg.author.id,
             channel_id=msg.channel.id,
             message_id=msg.id,
             timestamp=msg.created_at,
-            usage_type=EmojiUsageType.IN_TEXT)
+            usage_type=EmojiUsageType.IN_TEXT
+        )
 
     @classmethod
     def from_on_reaction(cls, rxn: Reaction, user: Member):
@@ -63,7 +61,9 @@ class EmojiUsage(BaseUsage):
             user_id=user.id,
             channel_id=rxn.message.channel.id,
             message_id=rxn.message.id,
-            usage_type=EmojiUsageType.REACTION)
+            timestamp=rxn.message.created_at,  # I'm assuming this is the correct timestamp
+            usage_type=EmojiUsageType.REACTION
+        )
 
 
 @dataclass(slots=True)
@@ -76,6 +76,10 @@ class StickerUsage(BaseUsage):
     @classmethod
     def from_message(cls, msg: Message):
         return cls(
+            _item=msg.stickers[0],  # I'm assuming this is the correct sticker
             user_id=msg.author.id,
+            guild_id=msg.guild.id,
             channel_id=msg.channel.id,
-            sticker=msg.sticker)
+            message_id=msg.id,
+            timestamp=msg.created_at
+        )

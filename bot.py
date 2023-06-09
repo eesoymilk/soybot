@@ -6,18 +6,13 @@ from utils import get_lumberjack
 
 log = get_lumberjack(__name__)
 initial_extensions = (
-    # 'extensions.autoresponse',
     'extensions.avatar',
-    # 'extensions.emomix',
+    'extensions.emoji_mixer',
     'extensions.waifu',
     'extensions.listeners',
     'extensions.simple_poll',
-    # 'extensions.poll',
     'extensions.soy_commands',
     'extensions.utilities',
-    'extensions.custom_emoji_stats',
-    # 'extensions.streak',
-    # 'extensions.nthu',
 )
 
 
@@ -26,7 +21,7 @@ class Soybot(Bot):
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
-        self.session = aiohttp.ClientSession()
+        self.cs = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
         self.tree.on_error = self.on_app_command_error
 

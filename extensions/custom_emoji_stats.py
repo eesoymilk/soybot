@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 from discord import Message, Reaction, Member, PartialEmoji, Emoji
 from discord.ext.commands import Cog, Bot
-from discord.abc import Messageable
 from utils import get_lumberjack, EmojiUsage
 
 log = get_lumberjack(__name__)
@@ -17,8 +16,8 @@ class CustomEmojiStatsCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @Cog.listener(name='on_message')
-    async def in_text_emojis(self, msg: Message):
+    @Cog.listener()
+    async def on_message(self, msg: Message):
 
         partial_emojis = [
             PartialEmoji.from_str(
@@ -33,20 +32,25 @@ class CustomEmojiStatsCog(Cog):
         if not emojis:
             return
 
-        emoji_usages = [EmojiUsage.from_in_text_emoji(e, msg) for e in emojis]
+        # TODO: add usages to db
+        emoji_usages = [
+            EmojiUsage.from_in_text_emoji(e, msg) for e in emojis
+        ]
 
         log.info(' | '.join([
             f'{msg.guild}',
             f'{msg.channel}',
             f'{msg.author}',
-            f'{emojis}']))
+            f'{emojis}'
+        ]))
 
     @Cog.listener()
     async def on_reaction_add(self, rxn: Reaction, user: Member):
         if not isinstance(rxn.emoji, Emoji):
             return
 
-        emoji_usage = EmojiUsage.from_reaction(rxn, user)
+        # TODO: add usage to db
+        emoji_usage = EmojiUsage.from_on_reaction(rxn, user)
 
     @Cog.listener()
     async def on_reaction_remove(self, rxn: Reaction, user: Member):

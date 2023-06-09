@@ -325,7 +325,7 @@ class Poll:
         log.info(f'{self.title} | ended')
 
 
-@ac.command(name="poll", description='發起投票吧！')
+@ac.command(name="viewpoll", description='poll using discord views')
 @ac.describe(duration='預設為20秒 (限制為10到180秒)')
 @ac.rename(anonymity='計票方式', format='投票形式', duration='投票持續秒數')
 @ac.choices(

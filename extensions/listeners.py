@@ -20,7 +20,8 @@ class Listeners(Cog):
             f'{msg.guild}',
             f'{msg.channel}',
             f'{msg.author}',
-            msg.content]))
+            f'{msg.content}'
+        ]))
 
     @Cog.listener()
     async def on_reaction_add(self, rxn: Reaction, user: Member):
@@ -32,7 +33,8 @@ class Listeners(Cog):
             f'{rxn.message.channel}',
             f'{user}',
             f'{rxn.emoji}',
-            rxn.message.jump_url]))
+            f'{rxn.message.jump_url}',
+        ]))
 
     @Cog.listener()
     async def on_reaction_remove(self, rxn: Reaction, user: Member):
@@ -44,7 +46,8 @@ class Listeners(Cog):
             f'{rxn.message.channel}',
             f'{user}',
             f'{rxn.emoji}',
-            rxn.message.jump_url]))
+            f'{rxn.message.jump_url}',
+        ]))
 
     @Cog.listener()
     async def on_typing(
@@ -61,7 +64,8 @@ class Listeners(Cog):
             f'{before.guild}',
             f'{before.channel}',
             f'{before.author}',
-            f'{before.content} -> {after.content}']))
+            f'{before.content} -> {after.content}'
+        ]))
 
     @Cog.listener()
     async def on_member_update(self, before: Member, after: Member):

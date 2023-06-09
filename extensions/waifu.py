@@ -19,15 +19,12 @@ log = get_lumberjack('waifu')
 waifu_im_api = 'https://api.waifu.im'
 
 
-async def fetch_waifu(session: ClientSession, url: str) -> dict:
-    async with session.get(url) as resp:
+async def fetch_waifu(cs: ClientSession, url: str) -> dict:
+    async with cs.get(url) as resp:
         data = await resp.json()
 
-    try:
-        image = data['images'][0]
-        return image
-    except KeyError:
-        raise
+    image = data['images'][0]
+    return image
 
 def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
     tags = [t['name'] for t in image['tags']]
@@ -87,7 +84,7 @@ class WaifuGroup(Group, name='waifu'):
 
         bot: Soybot = intx.client
         try:
-            image = await fetch_waifu(bot.session, url)
+            image = await fetch_waifu(bot.cs, url)
         except KeyError:
             await intx.followup.send('醒 你沒老婆')
             return
@@ -139,7 +136,7 @@ class WaifuGroup(Group, name='waifu'):
 
         bot: Soybot = intx.client
         try:
-            image = await fetch_waifu(bot.session, url)
+            image = await fetch_waifu(bot.cs, url)
         except KeyError:
             await intx.followup.send('不可以色色')
             return
