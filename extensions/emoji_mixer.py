@@ -21,7 +21,7 @@ def emoji_to_unicode(emoji: str, sep: str = '-'):
 
 
 def prefix_unicode(code: str, prefix: str = 'u', sep: str = '-'):
-    """Prefix unicode parts with 'u'."""
+    """Prefix unicode parts widockth 'u'."""
     return sep.join(f'{prefix}{part}' for part in code.split(sep))
 
 
