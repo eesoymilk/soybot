@@ -1,6 +1,10 @@
 name: deploy-to-azure-container-instance
 run-name: ${{ github.actor }} is pushing to Azure Container Instance
-on: [push]
+on:
+  push:
+    paths:
+      - "**.py"
+      - "requirement.txt"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
