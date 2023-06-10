@@ -39,7 +39,7 @@ A discord bot written in `discord.py` by eesoymilk.
 
 ## Deploy to ACI (Azure Container Instance)
 
-I'll document this later if I ever have time to. For now, let me just provide some useful refereces:
+I'll document this later if I ever have time to. For now, let me just provide some useful references:
 
 - [Configure a GitHub Action to create a container instance](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-github-action?tabs=userlevel)
 
