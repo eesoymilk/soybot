@@ -85,13 +85,11 @@ class WaifuGroup(Group, name='waifu'):
         bot: Soybot = intx.client
         try:
             image = await fetch_waifu(bot.cs, url)
+            embed, view = build_waifu_embed_view(title, image)
+            await intx.followup.send(embed=embed, view=view)
         except KeyError:
             await intx.followup.send('醒 你沒老婆')
-            return
         
-        embed, view = build_waifu_embed_view(title, image)
-
-        await intx.followup.send(embed=embed, view=view)
 
     @ac.command(
         name='可以色色',

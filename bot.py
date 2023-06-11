@@ -1,5 +1,11 @@
 import aiohttp
-from discord import User, Intents, Interaction
+from discord import (
+    Message,
+    Game,
+    User, 
+    Intents, 
+    Interaction,
+)
 from discord.app_commands import AppCommandError, CommandOnCooldown
 from discord.ext.commands import Bot
 from utils import get_lumberjack
@@ -16,9 +22,34 @@ initial_extensions = (
 )
 
 
+def _prefix_callable(bot: Bot, msg: Message):
+    user_id = bot.user.id
+    base = [f'<@!{user_id}> ', f'<@{user_id}> ']
+    if msg.guild is None:
+        base.append('!')
+        base.append('?')
+    else:
+        base.extend(bot.prefixes.get(msg.guild.id, ['?', '!']))
+    return base
+
 class Soybot(Bot):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        activity = Game(name='Your mom')
+        intents = Intents(
+            guilds=True,
+            members=True,
+            bans=True,
+            emojis=True,
+            voice_states=True,
+            messages=True,
+            reactions=True,
+            message_content=True,
+        )
+        super().__init__(
+            command_prefix=_prefix_callable,
+            intents=intents,
+            activity=activity,
+        )
 
     async def setup_hook(self):
         self.cs = aiohttp.ClientSession()
