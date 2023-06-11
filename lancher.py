@@ -38,7 +38,7 @@ def load_enviorment(e: str):
 
 async def main():
     parser = argparse.ArgumentParser(
-        description="Your program's description here"
+        description='command line arguments for soybot'
     )
     parser.add_argument(
         '-e', '--env',
@@ -46,7 +46,7 @@ async def main():
         default='dev',
         required=True,
         help='This option helps load different environment variables.'
-             f'Choices are {", ".join(EnvironmentChoices.all())}'
+             f'Choices are {", ".join(f"`{env}`" for env in EnvironmentChoices.all())}'
     )
     load_enviorment(parser.parse_args().env)
 
