@@ -13,12 +13,6 @@ from utils import get_lumberjack, cd_but_soymilk
 log = get_lumberjack(__name__)
 
 async def avatar(intx: Interaction, target: Member | User):
-    # if target.id == intx.client.user.id:
-    #     await intx.response.send_message(
-    #         f'不要ㄐ查豆漿ㄐㄐ人好ㄇ', 
-    #         ephemeral=True
-    #     )
-    #     return
 
     await intx.response.defer()
 
