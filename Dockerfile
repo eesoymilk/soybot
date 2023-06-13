@@ -2,9 +2,9 @@ FROM python:3-alpine3.18
 
 WORKDIR /usr/src/app
 
-RUN python3 -m venv vene
-RUN source venv/bin/activate
 RUN pip3 install --upgrade pip
+RUN python3 -m venv venv
+RUN source ./venv/bin/activate
 
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
