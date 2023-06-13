@@ -3,6 +3,7 @@ run-name: ${{ github.actor }} is pushing to Azure Container Instance
 on:
   push:
     paths:
+      - "Dockerfile"
       - "**.py"
       - "requirements.txt"
 jobs:
