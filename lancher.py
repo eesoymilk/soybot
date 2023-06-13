@@ -2,6 +2,7 @@ import os
 import argparse
 import asyncio
 import logging
+import textwrap
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
@@ -15,7 +16,7 @@ log = get_lumberjack(__name__)
 logging.getLogger('discord.http').setLevel(logging.INFO)
 
 
-class EnvironmentChoices:
+class EnvChoices:
     dev = ('dev', 'development')
     prod = ('prod', 'production')
     docker = ('docker',)
@@ -26,27 +27,32 @@ class EnvironmentChoices:
 
 
 def load_enviorment(e: str):
-    if e in EnvironmentChoices.dev:
+    if e in EnvChoices.dev:
         log.info('Running in development mode')
         load_dotenv('.env.dev')
-    elif e in EnvironmentChoices.prod:
+    elif e in EnvChoices.prod:
         log.info('Running in production mode')
         load_dotenv('.env')
-    elif e in EnvironmentChoices.docker:
+    elif e in EnvChoices.docker:
         log.info('Running in a docker container')
 
 
 async def main():
-    parser = argparse.ArgumentParser(
-        description='command line arguments for soybot'
-    )
+    parser_description = textwrap.dedent('''\
+        command line arguments for soybot
+    ''')
+    parser = argparse.ArgumentParser(description=parser_description)
+
+    env_help_text = textwrap.dedent(f'''\
+        This option helps load different environment variables.
+        Choices are {', '.join(f'"{env}"' for env in EnvChoices.all())}
+    ''')
     parser.add_argument(
         '-e', '--env',
-        choices=EnvironmentChoices.all(),
+        choices=EnvChoices.all(),
         default='dev',
         required=True,
-        help='This option helps load different environment variables.'
-             f'Choices are {", ".join(f"`{env}`" for env in EnvironmentChoices.all())}'
+        help=env_help_text
     )
     load_enviorment(parser.parse_args().env)
 

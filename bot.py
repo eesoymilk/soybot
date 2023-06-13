@@ -21,7 +21,7 @@ initial_extensions = (
     'extensions.utilities',
 )
 
-
+# TODO: more flexible command prefix
 def _prefix_callable(bot: Bot, msg: Message):
     user_id = bot.user.id
     base = [f'<@!{user_id}> ', f'<@{user_id}> ']
@@ -46,7 +46,7 @@ class Soybot(Bot):
             message_content=True,
         )
         super().__init__(
-            command_prefix=_prefix_callable,
+            command_prefix='!',
             intents=intents,
             activity=activity,
         )

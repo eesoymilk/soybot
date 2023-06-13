@@ -44,3 +44,5 @@ I'll document this later if I ever have time to. For now, let me just provide so
 - [Configure a GitHub Action to create a container instance](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-github-action?tabs=userlevel)
 
 - [GitHub Action - Deploy to Azure Container Instances](https://github.com/marketplace/actions/deploy-to-azure-container-instances)
+
+- [Retrieve container logs and events in Azure Container Instances](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-get-logs)
