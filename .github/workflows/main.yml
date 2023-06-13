@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "**.py"
-      - "requirement.txt"
+      - "requirements.txt"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
