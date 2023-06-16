@@ -1,35 +1,40 @@
 from discord import app_commands as ac, Interaction, Embed
+from discord.app_commands import locale_str as _T
 from discord.ext.commands import Cog, Bot
 from utils import get_lumberjack, cd_but_soymilk
 
 log = get_lumberjack(__name__)
 
+
 class SoyCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @ac.command(name='匿名發言', description='匿名複讀機')
-    @ac.rename(msg='複讀內容')
+    @ac.command(name='echo', description='echo_desc')
+    @ac.rename(msg='echo_msg')
+    @ac.describe(msg='echo_msg_desc')
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def soy(self, intx: Interaction, msg: str):
+        log.info(f'user locale: {intx.locale}')
+        log.info(f'guild locale: {intx.guild_locale}')
+
         await intx.channel.send(msg)
-        
+
         await intx.response.send_message(
             embed=Embed(
-                description=f'**已成功匿名傳送**',
+                description=await intx.translate('echo_success_msg'),
                 color=intx.user.color,
             ).add_field(
-                name='匿名訊息',
+                name=await intx.translate('echo_embed_message'),
                 value=msg
             ).add_field(
-                name='目標頻道',
+                name=await intx.translate('echo_embed_channel'),
                 value=intx.channel.mention
             ).set_author(
                 name=intx.user,
                 icon_url=intx.user.avatar,
             ).set_footer(
-                text='soybot is currently at beta.\n' +
-                'Please report bugs to eesoymilk if you encounter any.'
+                text=await intx.translate('beta')
             ),
             ephemeral=True
         )

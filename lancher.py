@@ -26,15 +26,11 @@ class EnvChoices:
         return cls.dev + cls.prod + cls.docker
 
 
-def load_enviorment(e: str):
-    if e in EnvChoices.dev:
-        log.info('Running in development mode')
-        load_dotenv('.env.dev')
-    elif e in EnvChoices.prod:
-        log.info('Running in production mode')
-        load_dotenv('.env')
-    elif e in EnvChoices.docker:
-        log.info('Running in a docker container')
+def load_enviorment(filename: str):
+    if filename is None:
+        return
+
+    load_dotenv(filename)
 
 
 async def main():
@@ -50,14 +46,25 @@ async def main():
     parser.add_argument(
         '-e', '--env',
         choices=EnvChoices.all(),
-        default='dev',
         required=True,
         help=env_help_text
     )
-    load_enviorment(parser.parse_args().env)
+
+    env = parser.parse_args().env
+    if env == 'docker':
+        env_file = None
+        command_prefix = '!'
+    elif env in ('prod', 'production'):
+        env_file = '.env'
+        command_prefix = '!'
+    else:
+        env_file = f'.env.{env}'
+        command_prefix = '?'
+
+    load_enviorment(env_file)
 
     motor_client = AsyncIOMotorClient(os.getenv('MONGODB_CONNECTION_STR'))
-    async with Soybot() as bot:
+    async with Soybot(command_prefix=command_prefix) as bot:
         bot.db: AsyncIOMotorDatabase = motor_client.eesoybot
         await bot.start(os.getenv('TOKEN'))
 

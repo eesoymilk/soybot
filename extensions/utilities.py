@@ -26,6 +26,7 @@ async def sync(
 ):
     if not guilds:
         if spec == '~':
+            log.info('Syncing to current guild...')
             synced = await ctx.bot.tree.sync(guild=ctx.guild)
         elif spec == '*':
             ctx.bot.tree.copy_global_to(guild=ctx.guild)
@@ -35,11 +36,13 @@ async def sync(
             await ctx.bot.tree.sync(guild=ctx.guild)
             synced = []
         else:
+            log.info('Syncing globally...')
             synced = await ctx.bot.tree.sync()
 
-        await ctx.send(
-            f'Synced {len(synced)} commands {"globally" if spec is None else "to the current guild."}'
-        )
+        msg = f'Synced {len(synced)} commands {"globally" if spec is None else "to the current guild."}'
+        log.info(msg)
+        await ctx.send(msg)
+
         return
 
     ret = 0
@@ -71,4 +74,5 @@ async def reload(ctx: Context, query: str = None):
 async def setup(bot: Bot):
     bot.add_command(sync)
     bot.add_command(reload)
+
     log.info(f'{__name__} loaded')

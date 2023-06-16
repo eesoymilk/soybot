@@ -1,10 +1,14 @@
+from typing import Optional
+
 from discord import (
-    app_commands as ac, 
-    Embed, 
-    Member, 
-    User, 
+    app_commands as ac,
+    Embed,
+    Client,
+    Member,
+    User,
     Interaction,
     ButtonStyle,
+    Asset,
 )
 from discord.ui import View, Button
 from discord.ext.commands import Bot
@@ -12,35 +16,46 @@ from utils import get_lumberjack, cd_but_soymilk
 
 log = get_lumberjack(__name__)
 
+
+def get_name(target: Member | User) -> str:
+    if target.global_name is None:
+        name = f'{target.name}#{target.discriminator}'
+    else:
+        name = target.global_name
+    if target.nick is not None:
+        name += f' ({target.display_name})'
+    return name
+
+
+def get_desc(user: Member | User, target: Member | User) -> str:
+    desc = f'{user.mention} inspected '
+    if user != target:
+        desc += target.mention
+    else:
+        desc += 'him/her-self'
+    return desc
+
+
+async def fetch_banner(client: Client, target_id: int) -> Optional[Asset]:
+    return (await client.fetch_user(target_id)).banner
+
+
 async def avatar(intx: Interaction, target: Member | User):
 
     await intx.response.defer()
 
-    print(f'global: {target.global_name}\nname: {target.name}')
-    print(f'display: {target.display_name}')
+    name = get_name(target)
 
-    if target.global_name is None:
-        name = f'{target.name}#{target.discriminator}'
-        if target.display_name != target.name:
-            name += f' ({target.display_name})'
-    else:
-        name = target.global_name
-        if target.global_name != target.name:
-            name += f' ({target.display_name})'
-    
-    if intx.user != target:
-        description = f'{intx.user.mention} inspected {target.mention}'
-    else:
-        description = f'{intx.user.mention} inspected him/her-self'
-    
+    desc = get_desc(intx.user, target)
+
     view = View().add_item(Button(
         style=ButtonStyle.link,
         url=f'{target.avatar}',
         label='Avatar Source',
     ))
-    
+
     embed = Embed(
-        description=description,
+        description=desc,
         color=target.color,
     ).set_author(
         name=name,
@@ -56,7 +71,7 @@ async def avatar(intx: Interaction, target: Member | User):
             url=f'{fetched_target.banner}',
             label='Bannar Source',
         ))
-        
+
         embed.set_thumbnail(
             url=target.display_avatar
         ).set_image(
@@ -68,19 +83,21 @@ async def avatar(intx: Interaction, target: Member | User):
     await intx.followup.send(embed=embed, view=view)
 
 
-@ac.command(name="avatar", description='Avatar inspection')
-# @ac.rename(target='稽查對象')
+@ac.command(description='avatar_desc')
+@ac.rename(target='avatar_target')
 @ac.checks.dynamic_cooldown(cd_but_soymilk)
 async def avatar_slash(intx: Interaction, target: Member):
     await avatar(intx, target)
-    log.info(f'{intx.user} used avatar on {target if intx.user != target else "him/her-self"}')
+    log.info(
+        f'{intx.user} used avatar on {target if intx.user != target else "him/her-self"}')
 
 
-@ac.context_menu(name='Avatar Inspection')
+@ac.context_menu()
 @ac.checks.dynamic_cooldown(cd_but_soymilk)
 async def avatar_ctx_menu(intx: Interaction, target: Member):
     await avatar(intx, target)
-    log.info(f'{intx.user} used avatar on {target if intx.user != target else "him/her-self"}')
+    log.info(
+        f'{intx.user} used avatar on {target if intx.user != target else "him/her-self"}')
 
 
 async def setup(bot: Bot):

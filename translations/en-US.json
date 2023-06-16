@@ -1,0 +1,42 @@
+{
+    "app_commands": {
+        "echo": {
+            "command_name": "echo",
+            "command_description": "Send a message anonymously"
+        },
+        "parameter_name": {
+            "msg": "message"
+        },
+        "parameter_description": {
+            "echo_msg_desc": "The message to send"
+        }
+    },
+
+
+    "command_name": {
+        "echo": "echo",
+        "avatar_slash": "avatar",
+        "avatar_ctx_menu": "avatar"
+    },
+    "command_description": {
+        "echo_desc": "Send a message anonymously",
+        "avatar_desc": "Inspect someone's avatar/banner"
+    },
+    "group_name": {},
+    "group_description": {},
+    "parameter_name": {
+        "echo_msg": "message",
+        "avatar_target": "target"
+    },
+    "parameter_description": {
+        "echo_msg_desc": "The message to send"
+    },
+    "choice_name": {},
+    "other": {
+        "echo_success_msg": "Message sent successfully!",
+        "echo_embed_message": "Message Sent",
+        "echo_embed_channel": "Target Channel",
+
+        "beta": "soybot is currently at beta.\nFeel free to give us feedback!"
+    }
+}

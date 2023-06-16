@@ -9,6 +9,7 @@ from discord import (
 from discord.app_commands import AppCommandError, CommandOnCooldown
 from discord.ext.commands import Bot
 from utils import get_lumberjack
+from utils.i18n import SoybotTranslator
 
 log = get_lumberjack(__name__)
 initial_extensions = (
@@ -46,15 +47,16 @@ class Soybot(Bot):
             message_content=True,
         )
         super().__init__(
-            command_prefix='!',
             intents=intents,
             activity=activity,
+            **kwargs
         )
 
     async def setup_hook(self):
         self.cs = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
         self.tree.on_error = self.on_app_command_error
+        await self.tree.set_translator(SoybotTranslator())
 
         for ext in initial_extensions:
             try:

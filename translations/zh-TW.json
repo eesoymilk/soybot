@@ -1,0 +1,28 @@
+{
+    "command_name": {
+        "echo": "匿名發言",
+        "avatar_slash": "稽查",
+        "avatar_ctx_menu": "稽查"
+    },
+    "command_description": {
+        "echo_desc": "用 soybot 傳送匿名訊息",
+        "avatar_desc": "稽查頭貼/橫幅"
+    },
+    "group_name": {},
+    "group_description": {},
+    "parameter_name": {
+        "echo_msg": "訊息"
+    },
+    "parameter_description": {
+        "echo_msg_desc": "內容",
+        "avatar_target": "稽查對象"
+    },
+    "choice_name": {},
+    "other": {
+        "echo_success_msg": "訊息成功傳送！",
+        "echo_embed_message": "訊息內容",
+        "echo_embed_channel": "傳送頻道",
+
+        "beta": "soybot 目前仍在測試階段，歡迎和我們說您的想法！"
+    }
+}
