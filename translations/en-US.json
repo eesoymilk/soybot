@@ -2,41 +2,100 @@
     "app_commands": {
         "echo": {
             "command_name": "echo",
-            "command_description": "Send a message anonymously"
+            "command_description": "Send a message anonymously",
+            "parameter_name": {
+                "msg": "message"
+            },
+            "parameter_description": {
+                "msg": "The message to send"
+            },
+            "other": {
+                "embed_success_msg": "Message sent successfully!",
+                "embed_message": "Message Sent",
+                "embed_channel": "Target Channel"
+            }
         },
-        "parameter_name": {
-            "msg": "message"
+        "avatar_slash": {
+            "command_name": "avatar",
+            "command_description": "Inspect someone's avatar/banner",
+            "parameter_name": {
+                "target": "target"
+            },
+            "parameter_description": {
+                "target": "Whose avatar/banner do you want to inspect?"
+            },
+            "other": {}
         },
-        "parameter_description": {
-            "echo_msg_desc": "The message to send"
+        "avatar_ctx_menu": {
+            "command_name": "avatar",
+            "other": {}
+        },
+
+        "waifu": {
+            "group_name": "waifu",
+            "group_description": "Fetch waifu from waifu.im"
+        },
+
+        "waifu-sfw": {
+            "command_name": "sfw",
+            "command_description": "no horny",
+            "parameter_name": {
+                "tag": "tag"
+            },
+            "parameter_description": {
+                "tag": "Choose a waifu category"
+            },
+            "choice_name": {
+                "uniform": "uniform",
+                "maid": "maid",
+                "mori-calliope": "mori-calliope",
+                "marin-kitagawa": "marin-kitagawa",
+                "raiden-shogun": "raiden-shogun",
+                "oppai": "oppai",
+                "selfies": "selfies",
+                "waifu": "waifu"
+            }
+        },
+
+        "waifu-nsfw": {
+            "command_name": "nsfw",
+            "command_description": "horny",
+            "parameter_name": {
+                "tag": "tag"
+            },
+            "parameter_description": {
+                "tag": "Choose a waifu category"
+            },
+            "choice_name": {
+                "hentai": "hentai",
+                "milf": "milf",
+                "oral": "oral",
+                "paizuri": "paizuri",
+                "ecchi": "ecchi",
+                "ass": "ass",
+                "ero": "ero"
+            }
+        },
+
+        "emoji_kitchen": {
+            "command_name": "emoji_kitchen",
+            "command_description": "Mix emojis together!",
+            "parameter_name": {
+                "emoji1": "first_emoji",
+                "emoji2": "second_emoji"
+            },
+            "parameter_description": {
+                "emoji1": "Enter a unicode emoji",
+                "emoji2": "Enter a unicode emoji (random if left empty)"
+            }
+        },
+
+        "reaction_poll": {
+            "command_name": "poll",
+            "command_description": "Start a reaction poll"
         }
     },
-
-
-    "command_name": {
-        "echo": "echo",
-        "avatar_slash": "avatar",
-        "avatar_ctx_menu": "avatar"
-    },
-    "command_description": {
-        "echo_desc": "Send a message anonymously",
-        "avatar_desc": "Inspect someone's avatar/banner"
-    },
-    "group_name": {},
-    "group_description": {},
-    "parameter_name": {
-        "echo_msg": "message",
-        "avatar_target": "target"
-    },
-    "parameter_description": {
-        "echo_msg_desc": "The message to send"
-    },
-    "choice_name": {},
-    "other": {
-        "echo_success_msg": "Message sent successfully!",
-        "echo_embed_message": "Message Sent",
-        "echo_embed_channel": "Target Channel",
-
+    "shared": {
         "beta": "soybot is currently at beta.\nFeel free to give us feedback!"
     }
 }

@@ -83,8 +83,8 @@ async def avatar(intx: Interaction, target: Member | User):
     await intx.followup.send(embed=embed, view=view)
 
 
-@ac.command(description='avatar_desc')
-@ac.rename(target='avatar_target')
+@ac.command()
+@ac.describe(target='target')
 @ac.checks.dynamic_cooldown(cd_but_soymilk)
 async def avatar_slash(intx: Interaction, target: Member):
     await avatar(intx, target)
@@ -92,7 +92,7 @@ async def avatar_slash(intx: Interaction, target: Member):
         f'{intx.user} used avatar on {target if intx.user != target else "him/her-self"}')
 
 
-@ac.context_menu()
+@ac.context_menu(name='avatar_ctx_menu')
 @ac.checks.dynamic_cooldown(cd_but_soymilk)
 async def avatar_ctx_menu(intx: Interaction, target: Member):
     await avatar(intx, target)

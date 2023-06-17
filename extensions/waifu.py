@@ -1,3 +1,4 @@
+from typing import Literal
 from datetime import datetime
 from aiohttp import ClientSession
 
@@ -26,6 +27,7 @@ async def fetch_waifu(cs: ClientSession, url: str) -> dict:
     image = data['images'][0]
     return image
 
+
 def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
     tags = [t['name'] for t in image['tags']]
     embed = Embed(
@@ -43,38 +45,52 @@ def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
         url=image['source'],
         label='查看圖源',
     ))
-    
+
     return embed, view
+
 
 class WaifuGroup(Group, name='waifu'):
 
     @ac.command(
-        name='抽老婆',
-        description='這我婆 那我婆 這個也我婆'
+        name='waifu-sfw',
+        # description='waifu-sfw_desc'
     )
-    @ac.describe(tag='你今天要哪種老婆')
-    @ac.rename(tag='老婆類型')
-    @ac.choices(
-        tag=[
-            Choice(
-                name=option,
-                value=tag_name
-            ) for option, tag_name in {
-                '老婆': 'waifu',
-                '制服': 'uniform',
-                '女僕': 'maid',
-                '森美聲': 'mori-calliope',
-                '喜多川海夢': 'marin-kitagawa',
-                '原神 雷電將軍': 'raiden-shogun',
-                '大奶': 'oppai',
-                '自拍': 'selfies',
-            }.items()
-        ]
-    )
+    @ac.describe(tag='tag')
+    @ac.rename(tag='tag')
+    # @ac.choices(
+    #     tag=[
+    #         Choice(
+    #             name=option,
+    #             value=tag_name
+    #         ) for option, tag_name in {
+    # '老婆': 'waifu',
+    # '制服': 'uniform',
+    # '女僕': 'maid',
+    # '森美聲': 'mori-calliope',
+    # '喜多川海夢': 'marin-kitagawa',
+    # '原神 雷電將軍': 'raiden-shogun',
+    # '大奶': 'oppai',
+    # '自拍': 'selfies',
+    #         }.items()
+    #     ]
+    # )
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
-    async def sfw_coro(self, intx: Interaction, tag: Choice[str] = None):
+    async def sfw_coro(
+        self,
+        intx: Interaction,
+        tag: Literal[
+            'waifu-sfw_waifu',
+            'waifu-sfw_uniform',
+            'waifu-sfw_maid',
+            'waifu-sfw_mori-calliope',
+            'waifu-sfw_marin-kitagawa',
+            'waifu-sfw_raiden-shogun',
+            'waifu-sfw_oppai',
+            'waifu-sfw_selfies',
+        ] = None
+    ):
         await intx.response.defer(thinking=True)
-        
+
         if tag is not None:
             title = tag.name
             url = f'{waifu_im_api}/search?included_tags={tag.value}'
@@ -89,42 +105,53 @@ class WaifuGroup(Group, name='waifu'):
             await intx.followup.send(embed=embed, view=view)
         except KeyError:
             await intx.followup.send('醒 你沒老婆')
-        
 
     @ac.command(
-        name='可以色色',
-        description='社會性死亡注意!',
+        name='waifu-nsfw',
+        # description='waifu-nsfw_desc',
         nsfw=True
     )
-    @ac.describe(tag='你今天想要哪種色色')
-    @ac.rename(tag='色色類型')
-    @ac.choices(
-        tag=[
-            Choice(
-                name=option,
-                value=tag_name
-            ) for option, tag_name in {
-                'Hentai': 'hentai',
-                '人妻': 'milf',
-                '咬': 'oral',
-                '大奶': 'paizuri',
-                'H': 'ecchi',
-                '尻': 'ass',
-                '色色': 'ero',
-            }.items()
-        ]
-    )
+    @ac.describe(tag='tag')
+    @ac.rename(tag='tag')
+    # @ac.choices(
+    #     tag=[
+    #         Choice(
+    #             name=option,
+    #             value=tag_name
+    #         ) for option, tag_name in {
+    #             'Hentai': 'hentai',
+    #             '人妻': 'milf',
+    #             '咬': 'oral',
+    #             '大奶': 'paizuri',
+    #             'H': 'ecchi',
+    #             '尻': 'ass',
+    #             '色色': 'ero',
+    #         }.items()
+    #     ]
+    # )
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
-    async def nsfw_coro(self, intx: Interaction, tag: Choice[str] = None):
+    async def nsfw_coro(
+        self,
+        intx: Interaction,
+        tag: Literal[
+            'waifu-nsfw_hentai',
+            'waifu-nsfw_milf',
+            'waifu-nsfw_oral',
+            'waifu-nsfw_paizuri',
+            'waifu-nsfw_ecchi',
+            'waifu-nsfw_ass',
+            'waifu-nsfw_ero',
+        ] = None
+    ):
         if not intx.channel.nsfw:
             await intx.response.send_message(
-                '😡😡請勿在非限制級頻道色色 **BONK!**\n' + 
+                '😡😡請勿在非限制級頻道色色 **BONK!**\n' +
                 '請至**限制級頻道**',
                 ephemeral=True)
             return
-        
+
         await intx.response.defer(thinking=True)
-        
+
         url = f'{waifu_im_api}/search?is_nsfw=true'
         if tag is not None:
             title = tag.name
@@ -138,7 +165,7 @@ class WaifuGroup(Group, name='waifu'):
         except KeyError:
             await intx.followup.send('不可以色色')
             return
-        
+
         embed, view = build_waifu_embed_view(title, image)
 
         await intx.followup.send(embed=embed, view=view)

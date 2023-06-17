@@ -1,13 +1,15 @@
 import aiohttp
+
 from discord import (
     Message,
     Game,
-    User, 
-    Intents, 
+    User,
+    Intents,
     Interaction,
 )
 from discord.app_commands import AppCommandError, CommandOnCooldown
 from discord.ext.commands import Bot
+
 from utils import get_lumberjack
 from utils.i18n import SoybotTranslator
 
@@ -17,12 +19,14 @@ initial_extensions = (
     'extensions.emoji_mixer',
     'extensions.waifu',
     'extensions.listeners',
-    'extensions.simple_poll',
+    'extensions.reaction_poll',
     'extensions.soy_commands',
     'extensions.utilities',
 )
 
 # TODO: more flexible command prefix
+
+
 def _prefix_callable(bot: Bot, msg: Message):
     user_id = bot.user.id
     base = [f'<@!{user_id}> ', f'<@{user_id}> ']
@@ -32,6 +36,7 @@ def _prefix_callable(bot: Bot, msg: Message):
     else:
         base.extend(bot.prefixes.get(msg.guild.id, ['?', '!']))
     return base
+
 
 class Soybot(Bot):
     def __init__(self, *args, **kwargs):
@@ -75,7 +80,7 @@ class Soybot(Bot):
     ):
         if isinstance(e, CommandOnCooldown):
             await intx.response.send_message(
-                f'冷卻中...\n請稍後**{str(round(e.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試', 
+                f'冷卻中...\n請稍後**{str(round(e.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試',
                 ephemeral=True)
         else:
             log.exception(e)

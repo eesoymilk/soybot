@@ -23,7 +23,8 @@ def get_lumberjack(
     # custom formatter
     formatter = Formatter(
         '%(asctime)s - %(funcName)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
     # console handler
     ch = StreamHandler()
@@ -36,7 +37,8 @@ def get_lumberjack(
         maxBytes=32 * 1024 * 1024,  # 32 MiB
         backupCount=5,  # Rotate through 5 files
         encoding='utf-8',
-        mode='a')
+        mode='a'
+    )
     fh.setLevel(file_level)
     fh.setFormatter(formatter)
 

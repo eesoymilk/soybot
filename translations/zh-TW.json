@@ -1,28 +1,103 @@
 {
-    "command_name": {
-        "echo": "匿名發言",
-        "avatar_slash": "稽查",
-        "avatar_ctx_menu": "稽查"
-    },
-    "command_description": {
-        "echo_desc": "用 soybot 傳送匿名訊息",
-        "avatar_desc": "稽查頭貼/橫幅"
-    },
-    "group_name": {},
-    "group_description": {},
-    "parameter_name": {
-        "echo_msg": "訊息"
-    },
-    "parameter_description": {
-        "echo_msg_desc": "內容",
-        "avatar_target": "稽查對象"
-    },
-    "choice_name": {},
-    "other": {
-        "echo_success_msg": "訊息成功傳送！",
-        "echo_embed_message": "訊息內容",
-        "echo_embed_channel": "傳送頻道",
+    "app_commands": {
+        "echo": {
+            "command_name": "匿名發言",
+            "command_description": "用 soybot 傳送匿名訊息",
+            "parameter_name": {
+                "msg": "訊息"
+            },
+            "parameter_description": {
+                "msg": "內容"
+            },
+            "other": {
+                "embed_success_msg": "訊息成功傳送！",
+                "embed_message": "訊息內容",
+                "embed_channel": "傳送頻道"
+            }
+        },
 
+        "avatar_slash": {
+            "command_name": "稽查",
+            "command_description": "稽查頭貼/橫幅",
+            "parameter_name": {
+                "target": "稽查對象"
+            },
+            "parameter_description": {
+                "target": "想要看誰的頭貼/橫幅"
+            },
+            "other": {}
+        },
+
+        "avatar_ctx_menu": {
+            "command_name": "稽查",
+            "other": {}
+        },
+
+        "waifu": {
+            "group_name": "waifu",
+            "group_description": "來抽個動漫油圖吧！"
+        },
+
+        "waifu-sfw": {
+            "command_name": "抽老婆",
+            "command_description": "抽老婆",
+            "parameter_name": {
+                "tag": "老婆類型"
+            },
+            "parameter_description": {
+                "tag": "你想要哪種老婆"
+            },
+            "choice_name": {
+                "uniform": "制服",
+                "maid": "女僕",
+                "mori-calliope": "森美聲",
+                "marin-kitagawa": "喜多川海夢",
+                "raiden-shogun": "原神 雷電將軍",
+                "oppai": "胸",
+                "selfies": "自拍",
+                "waifu": "婆"
+            }
+        },
+
+        "waifu-nsfw": {
+            "command_name": "色色",
+            "command_description": "小心社會性死亡！",
+            "parameter_name": {
+                "tag": "色色類型"
+            },
+            "parameter_description": {
+                "tag": "你想要哪一種色色？"
+            },
+            "choice_name": {
+                "hentai": "變態",
+                "milf": "人妻",
+                "oral": "口",
+                "paizuri": "大奶",
+                "ecchi": "Ｈ",
+                "ass": "尻",
+                "ero": "工口"
+            }
+        },
+
+        "emoji_kitchen": {
+            "command_name": "emoji_kitchen",
+            "command_description": "用 emoji kitchent 組合表情吧！",
+            "parameter_name": {
+                "emoji1": "第一個表情符號",
+                "emoji2": "第二個表情符號"
+            },
+            "parameter_description": {
+                "emoji1": "輸入一個非自訂的表情符號",
+                "emoji2": "輸入一個非自訂的表情符號（空白會隨機與第一個做組合）"
+            }
+        },
+
+        "reaction_poll": {
+            "command_name": "發起投票",
+            "command_description": "用表情符號投票吧！"
+        }
+    },
+    "shared": {
         "beta": "soybot 目前仍在測試階段，歡迎和我們說您的想法！"
     }
 }

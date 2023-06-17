@@ -10,9 +10,9 @@ class SoyCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @ac.command(name='echo', description='echo_desc')
-    @ac.rename(msg='echo_msg')
-    @ac.describe(msg='echo_msg_desc')
+    @ac.command(name='echo')
+    @ac.rename(msg='msg')
+    @ac.describe(msg='msg')
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def soy(self, intx: Interaction, msg: str):
         log.info(f'user locale: {intx.locale}')
@@ -34,7 +34,7 @@ class SoyCommands(Cog):
                 name=intx.user,
                 icon_url=intx.user.avatar,
             ).set_footer(
-                text=await intx.translate('beta')
+                text=await intx.translate(_T('beta', shared=True))
             ),
             ephemeral=True
         )

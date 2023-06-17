@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from discord import Locale
+from discord import app_commands as ac, Locale
 from discord.app_commands import (
     locale_str as _T,
     Translator,
-    TranslationContext
+    TranslationContext,
+    Command
 )
 
 from utils.lumberjack import get_lumberjack
@@ -44,32 +45,46 @@ class SoybotTranslator(Translator):
         This function must return a string (that's been translated), or `None` to signal no available translation available, and will default to the original.
         """
 
-        log.info(context.data)
-
         msg = string.message
         locale = locale.value
-        command_name = context.data.name
+        origin = context.data
         location = context.location.name
 
         if locale not in self.supported_locales:
             return None
 
-        log.info(f'Translaing: {msg} | {locale} | {location}')
-
         try:
-            translated_str = self.translations[locale][location][msg]
-            log.info(f'Translated: {translated_str}')
-            return translated_str
-        except KeyError as e:
-            log.exception(e)
-            log.info('Translation Failed')
-            return None
+            if string.extras.get('shared'):
+                return translations['shared'][msg]
 
-# IMPORTANT! put this in your `setup_hook` function
-# await bot.tree.set_translator(MyCustomTranslator())
-# Optional, but helps save a lot of typing
-# from discord.app_commands import locale_str as _T
-# @app_commands.command(name=_T("bonk"))
-# @app_commands.describe(user=_T("The user to bonk."))
-# async def bonk(interaction: discord.Interaction, user: discord.User):
-#   await interaction.response.send_message(f":hammer: {user.mention}")
+            translations = self.translations[locale]['app_commands']
+
+            if location == 'choice_name':
+                command_name, choice = msg.split('_')
+                res = translations[command_name][location][choice]
+            elif location in (
+                'command_name',
+                'command_description',
+                'group_name',
+                'group_description'
+            ):
+                command_name = origin.name
+                res = translations[command_name][location]
+            elif location in (
+                'parameter_name',
+                'parameter_description'
+            ):
+                command_name = origin.command.name
+                res = translations[command_name][location][msg]
+
+            log.info(
+                f'Translated: {msg} -> {res} | {locale} | {location}'
+            )
+
+            return res
+
+        except (KeyError, AttributeError) as e:
+            log.exception(
+                f'Translation failed: {msg} | {locale} | {location} | {e}'
+            )
+            return None

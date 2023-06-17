@@ -6,7 +6,7 @@ from discord import app_commands, Interaction
 from discord.ext.commands import Bot
 from discord.interactions import Interaction
 
-from utils import get_lumberjack, EmojiKitchen
+from utils import get_lumberjack, cd_but_soymilk, EmojiKitchen
 
 log = get_lumberjack(__name__)
 
@@ -42,12 +42,9 @@ def find_output(entries: list[dict], code1: str, code2: str):
     ))
 
 
-@app_commands.command(name='emoji_kitchen', description='Mix emojis together!')
-@app_commands.describe(
-    emoji1='Enter 1 unicode emoji',
-    emoji2='Enter 1 unicode emoji (random if left empty)'
-)
-@app_commands.rename(emoji1='first_emoji', emoji2='second_emoji')
+@app_commands.command(name='emoji_kitchen')
+@app_commands.describe(emoji1='emoji1', emoji2='emoji2')
+@app_commands.checks.dynamic_cooldown(cd_but_soymilk)
 async def emoji_mixer(
     intx: Interaction,
     emoji1: str,

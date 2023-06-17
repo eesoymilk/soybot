@@ -1,15 +1,16 @@
 import asyncio
 
 from discord import (
-    app_commands as ac, 
+    app_commands as ac,
     Interaction,
     Embed,
     TextStyle)
 from discord.ext.commands import Bot
 from discord.ui import Modal, TextInput
-from utils import get_lumberjack
+from utils import get_lumberjack, cd_but_soymilk
 
 log = get_lumberjack(__name__)
+
 
 class SimplePollModal(Modal, title='Simple Reaction Poll'):
 
@@ -42,7 +43,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
             if option in options:
                 continue
             options.append(option)
-        
+
         if (length := len(options)) < 2:
             await intx.response.send_message(
                 f'**cannot make a poll with {length} option(s)**',
@@ -60,7 +61,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
             text='soybot is currently at beta.\n' +
                  'Please report bugs to eeSoymilk#4231 if you encounter any.'
         )
-        for rxn ,option in zip(self.poll_reactions, options):
+        for rxn, option in zip(self.poll_reactions, options):
             embed.add_field(name=rxn, value=option)
 
         await intx.response.send_message(embed=embed)
@@ -68,17 +69,18 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
         poll_msg = await intx.original_response()
         await asyncio.gather(*[
             poll_msg.add_reaction(rxn)
-            for rxn ,_ in zip(self.poll_reactions, options)])
-        
+            for rxn, _ in zip(self.poll_reactions, options)])
+
         log.info(f'{intx.user}\'s poll started.')
 
 
-@ac.command(name='poll', description='reaction poll')
+@ac.command()
 @ac.guild_only()
-@ac.checks.cooldown(1, 60, key=lambda i: (i.channel.id, i.user.id))
-async def simple_poll(intx: Interaction):
+@ac.checks.dynamic_cooldown(cd_but_soymilk)
+async def reaction_poll(intx: Interaction):
     await intx.response.send_modal(SimplePollModal())
 
+
 async def setup(bot: Bot):
-    bot.tree.add_command(simple_poll)
+    bot.tree.add_command(reaction_poll)
     log.info(f'{__name__} loaded')
