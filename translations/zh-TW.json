@@ -56,6 +56,9 @@
                 "oppai": "胸",
                 "selfies": "自拍",
                 "waifu": "婆"
+            },
+            "other": {
+                "error": "醒，你沒老婆！"
             }
         },
 
@@ -76,6 +79,10 @@
                 "ecchi": "Ｈ",
                 "ass": "尻",
                 "ero": "工口"
+            },
+            "other": {
+                "no_horny": "😡😡請勿在非限制級頻道色色 **BONK!**\n請至**限制級頻道**",
+                "error": "不可以色色"
             }
         },
 
@@ -97,7 +104,9 @@
             "command_description": "用表情符號投票吧！"
         }
     },
+
     "shared": {
+        "random": "隨機",
         "beta": "soybot 目前仍在測試階段，歡迎和我們說您的想法！"
     }
 }

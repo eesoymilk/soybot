@@ -19,7 +19,6 @@ class SoybotTranslator(Translator):
     supported_locales = ('en-US', 'zh-TW')
 
     async def load(self):
-        log.info('Loading translations...')
         self.translations: dict[str, dict] = dict()
 
         translations_dir = Path('./translations')
@@ -45,17 +44,16 @@ class SoybotTranslator(Translator):
         This function must return a string (that's been translated), or `None` to signal no available translation available, and will default to the original.
         """
 
-        msg = string.message
         locale = locale.value
-        origin = context.data
         location = context.location.name
-
         if locale not in self.supported_locales:
             if location == 'other':
                 locale = 'en-US'
             else:
                 return None
 
+        msg = string.message
+        origin = context.data
         try:
             translations = self.translations[locale]
 
@@ -73,7 +71,7 @@ class SoybotTranslator(Translator):
             log.info(f'Translated: {msg} -> {res} | {locale} | {location}')
             return res
 
-        except (KeyError, AttributeError) as e:
+        except (KeyError, AttributeError, ValueError) as e:
             log.exception(
                 f'Translation failed: {msg} | {locale} | {location} | {e}')
             return None
@@ -86,10 +84,7 @@ class SoybotTranslator(Translator):
             'group_description'
         ):
             command_name, key = origin.name, None
-        elif location in (
-            'parameter_name',
-            'parameter_description'
-        ):
+        elif location in ('parameter_name', 'parameter_description'):
             command_name, key = origin.command.name, message
         elif location == 'choice_name':
             command_name, key = message.split('_')

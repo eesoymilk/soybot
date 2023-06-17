@@ -1,23 +1,15 @@
-from typing import Literal, Optional
-from datetime import datetime
-from aiohttp import ClientSession
+from typing import Optional
 
-from discord import (
-    app_commands as ac,
-    Interaction,
-    Embed,
-    Color,
-    ButtonStyle
-)
-from discord.app_commands import Choice, Group
+from discord import app_commands as ac, Interaction
+from discord.app_commands import locale_str as _T, Choice, Group
 from discord.ext.commands import Bot
-from discord.ui import View, Button
 
 from utils import get_lumberjack, cd_but_soymilk
 from utils.waifu_im import WaifuIm
 from bot import Soybot
 
 log = get_lumberjack(__name__)
+
 
 class WaifuGroup(Group, name='waifu'):
 
@@ -32,21 +24,19 @@ class WaifuGroup(Group, name='waifu'):
     ):
         await intx.response.defer(thinking=True)
 
-        url = f'{WaifuIm.BASE_URL}/search'
         if tag is not None:
             tag = tag.value
             title = tag
-            url += f'?included_tags={tag}'
         else:
-            title = 'Random'
+            title = await intx.translate(_T('random', shared=True))
 
-        bot: Soybot = intx.client
         try:
-            image = await WaifuIm.fetch(bot.cs, url)
+            bot: Soybot = intx.client
+            image = await WaifuIm.fetch(bot.cs, tag=tag)
             embed, view = WaifuIm.build_embed_view(title, image)
             await intx.followup.send(embed=embed, view=view)
         except KeyError:
-            await intx.followup.send('醒 你沒老婆')
+            await intx.followup.send(await intx.translate('error'))
 
     @ac.command(name='waifu-nsfw', nsfw=True)
     @ac.describe(tag='tag')
@@ -59,31 +49,27 @@ class WaifuGroup(Group, name='waifu'):
     ):
         if not intx.channel.nsfw:
             return await intx.response.send_message(
-                '😡😡請勿在非限制級頻道色色 **BONK!**\n' +
-                '請至**限制級頻道**',
+                await intx.translate('no_horny'),
                 ephemeral=True
             )
 
         await intx.response.defer(thinking=True)
 
-        url = f'{WaifuIm.BASE_URL}/search?is_nsfw=true'
         if tag is not None:
             tag = tag.value
             title = tag
-            url += f'&included_tags={tag}'
         else:
             title = 'Random'
 
         bot: Soybot = intx.client
         try:
-            image = await WaifuIm.fetch(bot.cs, url)
-        except KeyError:
-            await intx.followup.send('不可以色色')
-            return
-
-        embed, view = WaifuIm.build_embed_view(title, image)
-
-        await intx.followup.send(embed=embed, view=view)
+            bot: Soybot = intx.client
+            image = await WaifuIm.fetch(bot.cs, tag=tag)
+            embed, view = WaifuIm.build_embed_view(title, image)
+            await intx.followup.send(embed=embed, view=view)
+        except KeyError as e:
+            log.exception(e)
+            await intx.followup.send(await intx.translate('error'))
 
 
 async def setup(bot: Bot):

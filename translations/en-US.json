@@ -54,6 +54,9 @@
                 "oppai": "oppai",
                 "selfies": "selfies",
                 "waifu": "waifu"
+            },
+            "other": {
+                "error": "You have ZERO BITCHES!"
             }
         },
 
@@ -74,6 +77,10 @@
                 "ecchi": "ecchi",
                 "ass": "ass",
                 "ero": "ero"
+            },
+            "other": {
+                "no_horny": "NO HORNY in regular channels, **BONK!**\nPlease use this command only in **NSFW channels**.",
+                "error": "NO HORNY"
             }
         },
 
@@ -96,6 +103,7 @@
         }
     },
     "shared": {
+        "random": "random",
         "beta": "soybot is currently at beta.\nFeel free to give us feedback!"
     }
 }

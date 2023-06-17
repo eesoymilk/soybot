@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urljoin, urlencode
 
 from discord import Embed, Color, ButtonStyle
 from discord.ui import View, Button
@@ -7,7 +8,7 @@ from aiohttp import ClientSession
 
 
 class WaifuIm:
-    BASE_URL = 'https://api.waifu.im'
+    BASE_URL = 'https://api.waifu.im/'
 
     SFW_CHOICES = [Choice(name=opt, value=tag) for opt, tag in {
         'waifu-sfw_waifu': 'waifu',
@@ -31,7 +32,17 @@ class WaifuIm:
     }.items()]
 
     @staticmethod
-    async def fetch(cs: ClientSession, url: str) -> dict:
+    async def fetch(
+        cs: ClientSession,
+        is_nsfw: bool = False,
+        tag: str = None
+    ) -> dict:
+        params = dict()
+        if is_nsfw:
+            params |= {'is_nsfw': 'true'}
+        if tag is not None:
+            params |= {'included_tags': tag}
+        url = f'{urljoin(WaifuIm.BASE_URL, "/search")}?{urlencode(params)}'
         async with cs.get(url) as resp:
             data = await resp.json()
 
