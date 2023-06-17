@@ -3,6 +3,8 @@ import logging
 from logging import Logger, Formatter, StreamHandler
 from logging.handlers import RotatingFileHandler
 
+from discord.utils import _ColourFormatter
+
 
 def get_lumberjack(
     name: str,
@@ -20,16 +22,10 @@ def get_lumberjack(
     logger.propagate = False
     logger.setLevel(file_level)
 
-    # custom formatter
-    formatter = Formatter(
-        '%(asctime)s - %(funcName)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-
     # console handler
     ch = StreamHandler()
     ch.setLevel(console_level)
-    ch.setFormatter(formatter)
+    ch.setFormatter(_ColourFormatter())
 
     # file handler
     fh = RotatingFileHandler(
@@ -40,7 +36,11 @@ def get_lumberjack(
         mode='a'
     )
     fh.setLevel(file_level)
-    fh.setFormatter(formatter)
+    fh.setFormatter(Formatter(
+        '[{asctime}] [{levelname:<8}] {name}: {message}',
+        '%Y-%m-%d %H:%M:%S',
+        style='{'
+    ))
 
     logger.addHandler(ch)
     logger.addHandler(fh)

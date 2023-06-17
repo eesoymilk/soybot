@@ -10,7 +10,7 @@
                 "msg": "內容"
             },
             "other": {
-                "embed_success_msg": "訊息成功傳送！",
+                "embed_desc": "訊息成功傳送！",
                 "embed_message": "訊息內容",
                 "embed_channel": "傳送頻道"
             }

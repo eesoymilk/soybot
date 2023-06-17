@@ -51,40 +51,51 @@ class SoybotTranslator(Translator):
         location = context.location.name
 
         if locale not in self.supported_locales:
-            return None
+            if location == 'other':
+                locale = 'en-US'
+            else:
+                return None
 
         try:
+            translations = self.translations[locale]
+
             if string.extras.get('shared'):
-                return translations['shared'][msg]
-
-            translations = self.translations[locale]['app_commands']
-
-            if location == 'choice_name':
-                command_name, choice = msg.split('_')
-                res = translations[command_name][location][choice]
-            elif location in (
-                'command_name',
-                'command_description',
-                'group_name',
-                'group_description'
-            ):
-                command_name = origin.name
+                res = translations['shared'][msg]
+            else:
+                translations = translations['app_commands']
+                command_name, key = self._translation_resolution(
+                    origin, location, msg
+                )
                 res = translations[command_name][location]
-            elif location in (
-                'parameter_name',
-                'parameter_description'
-            ):
-                command_name = origin.command.name
-                res = translations[command_name][location][msg]
+                if key is not None:
+                    res = res[key]
 
-            log.info(
-                f'Translated: {msg} -> {res} | {locale} | {location}'
-            )
-
+            log.info(f'Translated: {msg} -> {res} | {locale} | {location}')
             return res
 
         except (KeyError, AttributeError) as e:
             log.exception(
-                f'Translation failed: {msg} | {locale} | {location} | {e}'
-            )
+                f'Translation failed: {msg} | {locale} | {location} | {e}')
             return None
+
+    def _translation_resolution(self, origin, location: str, message: str):
+        if location in (
+            'command_name',
+            'command_description',
+            'group_name',
+            'group_description'
+        ):
+            command_name, key = origin.name, None
+        elif location in (
+            'parameter_name',
+            'parameter_description'
+        ):
+            command_name, key = origin.command.name, message
+        elif location == 'choice_name':
+            command_name, key = message.split('_')
+        elif location == 'other':
+            command_name, key = origin.name, message
+        else:
+            raise ValueError('Unrecognized location')
+
+        return command_name, key

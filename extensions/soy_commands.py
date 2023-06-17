@@ -22,13 +22,13 @@ class SoyCommands(Cog):
 
         await intx.response.send_message(
             embed=Embed(
-                description=await intx.translate('echo_success_msg'),
+                description=await intx.translate('embed_desc'),
                 color=intx.user.color,
             ).add_field(
-                name=await intx.translate('echo_embed_message'),
+                name=await intx.translate('embed_message'),
                 value=msg
             ).add_field(
-                name=await intx.translate('echo_embed_channel'),
+                name=await intx.translate('embed_channel'),
                 value=intx.channel.mention
             ).set_author(
                 name=intx.user,

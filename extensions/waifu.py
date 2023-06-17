@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from datetime import datetime
 from aiohttp import ClientSession
 
@@ -18,7 +18,25 @@ from bot import Soybot
 
 log = get_lumberjack('waifu')
 waifu_im_api = 'https://api.waifu.im'
-
+sfw_choices = [Choice(name=opt,value=tag) for opt, tag in {
+    'waifu-sfw_waifu': 'waifu',
+    'waifu-sfw_uniform': 'uniform',
+    'waifu-sfw_maid': 'maid',
+    'waifu-sfw_mori-calliope': 'mori-calliope',
+    'waifu-sfw_marin-kitagawa': 'marin-kitagawa',
+    'waifu-sfw_raiden-shogun': 'raiden-shogun',
+    'waifu-sfw_oppai': 'oppai',
+    'waifu-sfw_selfies': 'selfies',
+}.items()]
+nsfw_choices = [Choice(name=opt,value=tag) for opt, tag in {
+    'waifu-nsfw_hentai': 'hentai',
+    'waifu-nsfw_milf': 'milf',
+    'waifu-nsfw_oral': 'oral',
+    'waifu-nsfw_paizuri': 'paizuri',
+    'waifu-nsfw_ecchi': 'ecchi',
+    'waifu-nsfw_ass': 'ass',
+    'waifu-nsfw_ero': 'ero',
+}.items()]
 
 async def fetch_waifu(cs: ClientSession, url: str) -> dict:
     async with cs.get(url) as resp:
@@ -51,52 +69,24 @@ def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
 
 class WaifuGroup(Group, name='waifu'):
 
-    @ac.command(
-        name='waifu-sfw',
-        # description='waifu-sfw_desc'
-    )
+    @ac.command(name='waifu-sfw')
     @ac.describe(tag='tag')
-    @ac.rename(tag='tag')
-    # @ac.choices(
-    #     tag=[
-    #         Choice(
-    #             name=option,
-    #             value=tag_name
-    #         ) for option, tag_name in {
-    # '老婆': 'waifu',
-    # '制服': 'uniform',
-    # '女僕': 'maid',
-    # '森美聲': 'mori-calliope',
-    # '喜多川海夢': 'marin-kitagawa',
-    # '原神 雷電將軍': 'raiden-shogun',
-    # '大奶': 'oppai',
-    # '自拍': 'selfies',
-    #         }.items()
-    #     ]
-    # )
+    @ac.choices(tag=sfw_choices)
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def sfw_coro(
         self,
         intx: Interaction,
-        tag: Literal[
-            'waifu-sfw_waifu',
-            'waifu-sfw_uniform',
-            'waifu-sfw_maid',
-            'waifu-sfw_mori-calliope',
-            'waifu-sfw_marin-kitagawa',
-            'waifu-sfw_raiden-shogun',
-            'waifu-sfw_oppai',
-            'waifu-sfw_selfies',
-        ] = None
+        tag: Optional[Choice[str]] = None
     ):
         await intx.response.defer(thinking=True)
 
+        url = f'{waifu_im_api}/search'
         if tag is not None:
-            title = tag.name
-            url = f'{waifu_im_api}/search?included_tags={tag.value}'
+            tag = tag.value
+            title = tag
+            url += f'?included_tags={tag}'
         else:
-            title = '隨機'
-            url = f'{waifu_im_api}/search'
+            title = 'Random'
 
         bot: Soybot = intx.client
         try:
@@ -106,58 +96,30 @@ class WaifuGroup(Group, name='waifu'):
         except KeyError:
             await intx.followup.send('醒 你沒老婆')
 
-    @ac.command(
-        name='waifu-nsfw',
-        # description='waifu-nsfw_desc',
-        nsfw=True
-    )
+    @ac.command(name='waifu-nsfw', nsfw=True)
     @ac.describe(tag='tag')
-    @ac.rename(tag='tag')
-    # @ac.choices(
-    #     tag=[
-    #         Choice(
-    #             name=option,
-    #             value=tag_name
-    #         ) for option, tag_name in {
-    #             'Hentai': 'hentai',
-    #             '人妻': 'milf',
-    #             '咬': 'oral',
-    #             '大奶': 'paizuri',
-    #             'H': 'ecchi',
-    #             '尻': 'ass',
-    #             '色色': 'ero',
-    #         }.items()
-    #     ]
-    # )
+    @ac.choices(tag=nsfw_choices)
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def nsfw_coro(
         self,
         intx: Interaction,
-        tag: Literal[
-            'waifu-nsfw_hentai',
-            'waifu-nsfw_milf',
-            'waifu-nsfw_oral',
-            'waifu-nsfw_paizuri',
-            'waifu-nsfw_ecchi',
-            'waifu-nsfw_ass',
-            'waifu-nsfw_ero',
-        ] = None
+        tag: Optional[Choice[str]] = None
     ):
         if not intx.channel.nsfw:
-            await intx.response.send_message(
+            return await intx.response.send_message(
                 '😡😡請勿在非限制級頻道色色 **BONK!**\n' +
                 '請至**限制級頻道**',
-                ephemeral=True)
-            return
+                ephemeral=True
+            )
 
         await intx.response.defer(thinking=True)
 
         url = f'{waifu_im_api}/search?is_nsfw=true'
         if tag is not None:
-            title = tag.name
+            title = tag.name_localizations[intx.locale.value]
             url += f'&included_tags={tag.value}'
         else:
-            title = '隨機'
+            title = 'Random'
 
         bot: Soybot = intx.client
         try:
