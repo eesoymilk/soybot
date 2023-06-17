@@ -63,4 +63,3 @@ class CustomEmojiStatsCog(Cog):
 
 async def setup(bot: Bot):
     await bot.add_cog(CustomEmojiStatsCog(bot))
-    log.info(f'{__name__} loaded')

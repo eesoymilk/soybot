@@ -1,5 +1,10 @@
+from random import random
+
 class EmojiKitchen:
-    ROOT_URL = 'https://www.gstatic.com/android/keyboard/emojikitchen'
+    
+    OUTPUT_PATH = './assets/emojiOutput.json'
+    
+    ROOT_URL = 'https://www.gstatic.com/android/keyboard/emojikitchen/'
     
     SUPPORTED_DATES = (
         '20201001',

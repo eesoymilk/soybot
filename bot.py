@@ -15,13 +15,14 @@ from utils.i18n import SoybotTranslator
 
 log = get_lumberjack(__name__)
 initial_extensions = (
+    'extensions.help',
     'extensions.avatar',
-    'extensions.emoji_mixer',
+    'extensions.emoji_kitchen',
     'extensions.waifu',
     'extensions.listeners',
     'extensions.reaction_poll',
     'extensions.soy_commands',
-    'extensions.utilities',
+    'extensions.admin',
 )
 
 # TODO: more flexible command prefix
@@ -39,6 +40,8 @@ def _prefix_callable(bot: Bot, msg: Message):
 
 
 class Soybot(Bot):
+
+
     def __init__(self, *args, **kwargs):
         activity = Game(name='Your Mom')
         intents = Intents(
@@ -58,16 +61,18 @@ class Soybot(Bot):
         )
 
     async def setup_hook(self):
-        self.cs = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
-        self.tree.on_error = self.on_app_command_error
-        await self.tree.set_translator(SoybotTranslator())
+        self.cs = aiohttp.ClientSession()
 
         for ext in initial_extensions:
             try:
                 await self.load_extension(ext)
+                log.info(f'{ext} loaded')
             except Exception as e:
                 log.exception(f'Failed to load extension {ext}.')
+    
+        self.tree.on_error = self.on_app_command_error
+        await self.tree.set_translator(SoybotTranslator())
 
     @property
     def owner(self) -> User:

@@ -117,4 +117,3 @@ async def setup(bot: commands.Bot):
         NthuCog(bot),
         guild=discord.Object(nthu_guild_id)
     )
-    log.info('loaded')

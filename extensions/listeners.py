@@ -13,7 +13,7 @@ class Listeners(Cog):
 
     @Cog.listener()
     async def on_message(self, msg: Message):
-        if msg.author.id == self.bot.user.id:
+        if msg.author == self.bot.user:
             return
 
         log.info(' | '.join([
@@ -74,4 +74,3 @@ class Listeners(Cog):
 
 async def setup(bot: Bot):
     await bot.add_cog(Listeners(bot))
-    log.info(f'{__name__} loaded')

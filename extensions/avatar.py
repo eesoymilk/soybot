@@ -103,4 +103,3 @@ async def avatar_ctx_menu(intx: Interaction, target: Member):
 async def setup(bot: Bot):
     bot.tree.add_command(avatar_slash)
     bot.tree.add_command(avatar_ctx_menu)
-    log.info(f'{__name__} loaded')

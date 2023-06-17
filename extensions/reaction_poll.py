@@ -83,4 +83,3 @@ async def reaction_poll(intx: Interaction):
 
 async def setup(bot: Bot):
     bot.tree.add_command(reaction_poll)
-    log.info(f'{__name__} loaded')

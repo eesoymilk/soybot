@@ -74,4 +74,3 @@ class WaifuGroup(Group, name='waifu'):
 
 async def setup(bot: Bot):
     bot.tree.add_command(WaifuGroup())
-    log.info(f'{__name__} loaded')

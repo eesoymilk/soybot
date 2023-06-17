@@ -44,4 +44,3 @@ class SoyCommands(Cog):
 
 async def setup(bot: Bot):
     await bot.add_cog(SoyCommands(bot))
-    log.info(f'{__name__} loaded')
