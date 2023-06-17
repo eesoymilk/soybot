@@ -3,7 +3,7 @@ import asyncio
 from pathlib import Path
 from typing import Optional, Literal
 
-from discord import Object, HTTPException
+from discord import Object, HTTPException, Embed
 from discord.ext import commands
 from discord.ext.commands import (
     Cog,
@@ -68,26 +68,51 @@ class AdminCog(Cog):
     async def reload(
         self,
         ctx: Context,
-        *exts_prompt: str
+        *prompts: str
     ):
-        if not exts_prompt or '*' in exts_prompt:
-            exts = list(ctx.bot.extensions.keys())
-        else:
-            exts = []
-            for ext in exts_prompt:
-                path = Path('./extensions')/f'{ext}.py'
-                if os.path.isfile(path):
-                    exts.append(f'extensions.{ext}')
-
-        if not exts:
-            return await ctx.send(f'Unrecognized extension(s)')
+        try:
+            exts = self.find_extensions(prompts)
+        except ValueError as e:
+            log.exception(e)
+            return await ctx.send(
+                f'Unrecognized extension(s): {e}'
+            )
 
         # Python 3.11+
         async with asyncio.TaskGroup() as tg:
-            tasks = [tg.create_task(ctx.bot.reload_extension(ext))
-                     for ext in exts]
+            tasks = [tg.create_task(
+                ctx.bot.reload_extension(ext)
+            ) for ext in exts]
 
         await ctx.send(f'**{"**, **".join(exts)}** reloaded')
+
+    def find_extension(self, prompt: str):
+        if os.path.isfile(Path('./extensions')/f'{prompt}.py'):
+            return f'extensions.{prompt}'
+
+        return next((
+            ext
+            for ext in self.bot.extensions.keys()
+            if prompt in ext
+        ))
+
+    def find_extensions(self, prompts: tuple[str]):
+        if not prompts:
+            return self.bot.extensions.keys()
+
+        exts = []
+        failed_prompts = []
+        for prompt in prompts:
+            try:
+                exts.append(self.find_extension(prompt))
+            except StopIteration as e:
+                log.exception(f'Unrecognized extension: {prompt}')
+                failed_prompts.append(prompt)
+
+        if exts:
+            return exts
+
+        raise ValueError(f'**{", ".join(failed_prompts)}**')
 
 
 async def setup(bot: Bot):
