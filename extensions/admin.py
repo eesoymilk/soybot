@@ -25,6 +25,7 @@ class AdminCog(Cog):
     @commands.guild_only()
     @commands.is_owner()
     async def sync(
+        self,
         ctx: Context,
         guilds: Greedy[Object],
         spec: Optional[Literal['~', '*', '^']] = None
