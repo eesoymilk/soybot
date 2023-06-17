@@ -14,64 +14,16 @@ from discord.ext.commands import Bot
 from discord.ui import View, Button
 
 from utils import get_lumberjack, cd_but_soymilk
+from utils.waifu_im import WaifuIm
 from bot import Soybot
 
-log = get_lumberjack('waifu')
-waifu_im_api = 'https://api.waifu.im'
-sfw_choices = [Choice(name=opt,value=tag) for opt, tag in {
-    'waifu-sfw_waifu': 'waifu',
-    'waifu-sfw_uniform': 'uniform',
-    'waifu-sfw_maid': 'maid',
-    'waifu-sfw_mori-calliope': 'mori-calliope',
-    'waifu-sfw_marin-kitagawa': 'marin-kitagawa',
-    'waifu-sfw_raiden-shogun': 'raiden-shogun',
-    'waifu-sfw_oppai': 'oppai',
-    'waifu-sfw_selfies': 'selfies',
-}.items()]
-nsfw_choices = [Choice(name=opt,value=tag) for opt, tag in {
-    'waifu-nsfw_hentai': 'hentai',
-    'waifu-nsfw_milf': 'milf',
-    'waifu-nsfw_oral': 'oral',
-    'waifu-nsfw_paizuri': 'paizuri',
-    'waifu-nsfw_ecchi': 'ecchi',
-    'waifu-nsfw_ass': 'ass',
-    'waifu-nsfw_ero': 'ero',
-}.items()]
-
-async def fetch_waifu(cs: ClientSession, url: str) -> dict:
-    async with cs.get(url) as resp:
-        data = await resp.json()
-
-    image = data['images'][0]
-    return image
-
-
-def build_waifu_embed_view(title: str, image: dict) -> tuple[Embed, View]:
-    tags = [t['name'] for t in image['tags']]
-    embed = Embed(
-        title=title,
-        description=''.join([f'#{t}' for t in tags]),
-        color=Color.from_str(image['dominant_color']),
-        timestamp=datetime.fromisoformat(image['uploaded_at']),
-    ).set_image(
-        url=image['url'],
-    ).set_footer(
-        text='uploaded at'
-    )
-    view = View().add_item(Button(
-        style=ButtonStyle.link,
-        url=image['source'],
-        label='查看圖源',
-    ))
-
-    return embed, view
-
+log = get_lumberjack(__name__)
 
 class WaifuGroup(Group, name='waifu'):
 
     @ac.command(name='waifu-sfw')
     @ac.describe(tag='tag')
-    @ac.choices(tag=sfw_choices)
+    @ac.choices(tag=WaifuIm.SFW_CHOICES)
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def sfw_coro(
         self,
@@ -80,7 +32,7 @@ class WaifuGroup(Group, name='waifu'):
     ):
         await intx.response.defer(thinking=True)
 
-        url = f'{waifu_im_api}/search'
+        url = f'{WaifuIm.BASE_URL}/search'
         if tag is not None:
             tag = tag.value
             title = tag
@@ -90,15 +42,15 @@ class WaifuGroup(Group, name='waifu'):
 
         bot: Soybot = intx.client
         try:
-            image = await fetch_waifu(bot.cs, url)
-            embed, view = build_waifu_embed_view(title, image)
+            image = await WaifuIm.fetch(bot.cs, url)
+            embed, view = WaifuIm.build_embed_view(title, image)
             await intx.followup.send(embed=embed, view=view)
         except KeyError:
             await intx.followup.send('醒 你沒老婆')
 
     @ac.command(name='waifu-nsfw', nsfw=True)
     @ac.describe(tag='tag')
-    @ac.choices(tag=nsfw_choices)
+    @ac.choices(tag=WaifuIm.NSFW_CHOICES)
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def nsfw_coro(
         self,
@@ -114,21 +66,22 @@ class WaifuGroup(Group, name='waifu'):
 
         await intx.response.defer(thinking=True)
 
-        url = f'{waifu_im_api}/search?is_nsfw=true'
+        url = f'{WaifuIm.BASE_URL}/search?is_nsfw=true'
         if tag is not None:
-            title = tag.name_localizations[intx.locale.value]
-            url += f'&included_tags={tag.value}'
+            tag = tag.value
+            title = tag
+            url += f'&included_tags={tag}'
         else:
             title = 'Random'
 
         bot: Soybot = intx.client
         try:
-            image = await fetch_waifu(bot.cs, url)
+            image = await WaifuIm.fetch(bot.cs, url)
         except KeyError:
             await intx.followup.send('不可以色色')
             return
 
-        embed, view = build_waifu_embed_view(title, image)
+        embed, view = WaifuIm.build_embed_view(title, image)
 
         await intx.followup.send(embed=embed, view=view)
 
