@@ -64,6 +64,8 @@ jobs:
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
             docker run -d \
+              --log-driver=gcplogs \
+              --log-opt gcp-project=${{ env.GCP_PROJECT }} \
               --env TOKEN=${{ secrets.TOKEN }} \
               --name ${{ env.CONTAINER_NAME }} \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
