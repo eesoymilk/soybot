@@ -93,7 +93,7 @@ class AdminCog(Cog):
         return next((
             ext
             for ext in self.bot.extensions.keys()
-            if prompt in ext
+            if prompt in ext.split('.')[1]
         ))
 
     def find_extensions(self, prompts: tuple[str]):
