@@ -45,18 +45,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: executing remote ssh commands using password
+      - name: SSH to Kamatera and deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.KAMATERA_HOST }}
           username: root
           password: ${{ secrets.KAMATERA_PASSWORD }}
           script: |
-            docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} || true
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main || true
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
             docker run -d \
               --name ${{ env.CONTAINER_NAME }} \
               --env TOKEN=${{ secrets.TOKEN }} \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
