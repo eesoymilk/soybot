@@ -56,6 +56,9 @@ async def main():
     if env == 'docker':
         env_file = None
         command_prefix = '!'
+    elif env == 'gcr':
+        env_file = None
+        command_prefix = '!'
     elif env in ('prod', 'production'):
         env_file = '.env'
         command_prefix = '!'
