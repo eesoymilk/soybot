@@ -4,6 +4,7 @@ import asyncio
 import logging
 import textwrap
 
+import google.cloud.logging as gc_logging
 from discord.utils import setup_logging
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from dotenv import load_dotenv
@@ -11,10 +12,14 @@ from dotenv import load_dotenv
 from utils import get_lumberjack
 from bot import Soybot
 
+gc_client = gc_logging.Client()
+gc_client.setup_logging()
+
 # Multiple calls to getLogger() with the same name will return a reference to the same logger object.
 # Hence, we are just calling the preset loggers in discord.py
 log = get_lumberjack(__name__)
 logging.getLogger('discord.http').setLevel(logging.WARNING)
+setup_logging()
 
 
 class EnvChoices:

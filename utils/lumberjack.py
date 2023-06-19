@@ -46,11 +46,7 @@ class ColorFormatter(Formatter):
         return output
 
 
-def get_lumberjack(
-    name: str,
-    level=logging.INFO,
-    gc_level=logging.INFO
-) -> Logger:
+def get_lumberjack(name: str, level=logging.INFO) -> Logger:
     logger = logging.getLogger(name)
     if not logger.propagate:
         return logger
@@ -65,11 +61,6 @@ def get_lumberjack(
     ch.setFormatter(ColorFormatter())
 
     # google handler
-    # gc = cloud_logging.handlers.CloudLoggingHandler(gc_client)
-    # gc.setLevel(gc_level)
-    # gc.setFormatter(ColorFormatter())
-
     logger.addHandler(ch)
-    # logger.addHandler(gc)
 
     return logger
