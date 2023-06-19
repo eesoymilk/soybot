@@ -1,11 +1,16 @@
-name: deploy-to-azure-container-instance
-run-name: ${{ github.actor }} is pushing to Azure Container Instance
+name: deploy-to-kamatera-server
+run-name: ${{ github.actor }} is pushing to Kamatera
 on:
   push:
     paths:
       - "Dockerfile"
       - "**.py"
       - "requirements.txt"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,14 +25,20 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile
           push: true
-          tags: ${{ github.actor }}/soybot:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
