@@ -62,8 +62,8 @@ jobs:
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
             docker run -d \
-              --log-driver=gcplogs
+              --log-driver=gcplogs \
               --env GOOGLE_APPLICATION_CREDENTIALS=/etc/docker/service-account-key.json \
-              --name ${{ env.CONTAINER_NAME }} \
               --env TOKEN=${{ secrets.TOKEN }} \
+              --name ${{ env.CONTAINER_NAME }} \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
