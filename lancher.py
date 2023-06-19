@@ -15,7 +15,6 @@ from bot import Soybot
 # Hence, we are just calling the preset loggers in discord.py
 log = get_lumberjack(__name__)
 logging.getLogger('discord.http').setLevel(logging.WARNING)
-setup_logging()
 
 
 class EnvChoices:

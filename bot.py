@@ -1,4 +1,5 @@
 import aiohttp
+import logging
 
 from discord import (
     Message,
@@ -7,6 +8,7 @@ from discord import (
     Intents,
     Interaction,
 )
+from discord.utils import setup_logging
 from discord.app_commands import AppCommandError, CommandOnCooldown
 from discord.ext.commands import Bot
 
@@ -63,6 +65,8 @@ class Soybot(Bot):
     async def setup_hook(self):
         self.bot_app_info = await self.application_info()
         self.cs = aiohttp.ClientSession()
+        
+        setup_logging()
 
         for ext in initial_extensions:
             try:

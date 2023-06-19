@@ -1,6 +1,11 @@
 import logging
 from logging import Logger, Formatter, StreamHandler
 
+from google.cloud import logging as cloud_logging
+
+
+gc_client = cloud_logging.Client()
+
 
 class ColorFormatter(Formatter):
 
@@ -47,7 +52,9 @@ class ColorFormatter(Formatter):
 
 
 def get_lumberjack(
-    name: str, level=logging.INFO
+    name: str,
+    level=logging.INFO,
+    gc_level=logging.INFO
 ) -> Logger:
     logger = logging.getLogger(name)
     if not logger.propagate:
@@ -62,6 +69,12 @@ def get_lumberjack(
     ch.setLevel(level)
     ch.setFormatter(ColorFormatter())
 
+    # google handler
+    gc = cloud_logging.handlers.CloudLoggingHandler(gc_client)
+    gc.setLevel(gc_level)
+    gc.setFormatter(ColorFormatter())
+
     logger.addHandler(ch)
+    logger.addHandler(gc)
 
     return logger
