@@ -11,6 +11,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  CONTAINER_NAME: soybot-container
 
 jobs:
   build-and-deploy:
@@ -43,3 +44,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.KAMATERA_HOST }}
+          username: root
+          password: ${{ secrets.KAMATERA_PASSWORD }}
+          script: |
+            docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} || true
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --env TOKEN=${{ secrets.TOKEN }} \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
