@@ -14,10 +14,9 @@ env:
   CONTAINER_NAME: soybot-container
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      # checkout the repo
       - name: Checkout GitHub Action
         uses: actions/checkout@main
 
@@ -44,7 +43,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: SSH to Kamatera and deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
