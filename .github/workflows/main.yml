@@ -3,6 +3,7 @@ run-name: ${{ github.actor }} is pushing to Kamatera
 on:
   push:
     paths:
+      - ".github/workflows/main.yml"
       - "Dockerfile"
       - "**.py"
       - "requirements.txt"
