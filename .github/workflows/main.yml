@@ -65,8 +65,6 @@ jobs:
             docker rm ${{ env.CONTAINER_NAME }} || true
             export GOOGLE_APPLICATION_CREDENTIALS=${{ env.GCPLOGS_AUTH_PATH }}
             docker run -d \
-              --log-driver=gcplogs \
-              --log-opt gcp-project=${{ env.GCP_PROJECT }} \
               --env TOKEN=${{ secrets.TOKEN }} \
               --name ${{ env.CONTAINER_NAME }} \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
