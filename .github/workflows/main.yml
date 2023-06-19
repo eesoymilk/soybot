@@ -12,7 +12,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   CONTAINER_NAME: soybot-container
-  GCPLOGS_AUTH_PATH: ~/.config/gcplogs/auth.json
+  GCPLOGS_AUTH_PATH: $HOME/.config/gcplogs/auth.json
   GCP_PROJECT: eesoybot
 
 jobs:
