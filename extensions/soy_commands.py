@@ -1,4 +1,4 @@
-from discord import app_commands as ac, Interaction, Embed
+from discord import app_commands as ac, Interaction, Embed, Forbidden
 from discord.app_commands import locale_str as _T
 from discord.ext.commands import Cog, Bot
 from utils import get_lumberjack, cd_but_soymilk
@@ -15,14 +15,18 @@ class SoyCommands(Cog):
     @ac.describe(msg='msg')
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def soy(self, intx: Interaction, msg: str):
-        log.info(f'user locale: {intx.locale}')
-        log.info(f'guild locale: {intx.guild_locale}')
-
-        await intx.channel.send(msg)
+        try:
+            await intx.channel.send(msg)
+            title = await intx.translate('embed_success_title')
+            description = None
+        except Forbidden as e:
+            title = await intx.translate('embed_error_title')
+            description = await intx.translate('embed_error_desc')
 
         await intx.response.send_message(
             embed=Embed(
-                description=await intx.translate('embed_desc'),
+                title=title,
+                description=description,
                 color=intx.user.color,
             ).add_field(
                 name=await intx.translate('embed_message'),
@@ -39,7 +43,13 @@ class SoyCommands(Cog):
             ephemeral=True
         )
 
-        log.info(f'{intx.user} | {intx.guild} | {intx.channel} | {msg}')
+        log.info('|'.join([
+            f'{intx.user}',
+            f'{intx.guild}',
+            f'{intx.channel}',
+            f'{msg}',
+            'error' if description is not None else 'success',
+        ]))
 
 
 async def setup(bot: Bot):

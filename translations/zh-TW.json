@@ -10,7 +10,9 @@
                 "msg": "內容"
             },
             "other": {
-                "embed_desc": "訊息成功傳送！",
+                "embed_success_title": "訊息成功傳送！",
+                "embed_error_title": "訊息傳送失敗！",
+                "embed_error_desc": "soybot 在此頻道無權限發言",
                 "embed_message": "訊息內容",
                 "embed_channel": "傳送頻道"
             }

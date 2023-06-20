@@ -10,7 +10,9 @@
                 "msg": "The message to send"
             },
             "other": {
-                "embed_desc": "Message sent successfully!",
+                "embed_success_title": "Message sent successfully!",
+                "embed_error_title": "An error occured while sending message!",
+                "embed_error_desc": "soybot may not have access to this channel.",
                 "embed_message": "Message Sent",
                 "embed_channel": "Target Channel"
             }
