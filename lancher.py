@@ -5,7 +5,6 @@ import logging
 import textwrap
 
 from discord.utils import setup_logging
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from dotenv import load_dotenv
 
 from utils import get_lumberjack
@@ -56,9 +55,6 @@ async def main():
     if env == 'docker':
         env_file = None
         command_prefix = '!'
-    elif env == 'gcr':
-        env_file = None
-        command_prefix = '!'
     elif env in ('prod', 'production'):
         env_file = '.env'
         command_prefix = '!'
@@ -68,7 +64,6 @@ async def main():
 
     load_enviorment(env_file)
 
-    # motor_client = AsyncIOMotorClient(os.getenv('MONGODB_CONNECTION_STR'))
     async with Soybot(command_prefix=command_prefix) as bot:
         # bot.db: AsyncIOMotorDatabase = motor_client.eesoybot
         await bot.start(os.getenv('TOKEN'))

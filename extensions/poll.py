@@ -4,12 +4,12 @@ from discord import (
     app_commands as ac,
     Embed,
     TextStyle,
-    Color, 
     Interaction,
     Message,
     Member,
     SelectOption,
-    ButtonStyle
+    ButtonStyle,
+    Color,
 )
 from discord.ui import Modal, Select, View, Button, TextInput
 from discord.app_commands import Choice, Range

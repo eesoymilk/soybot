@@ -7,7 +7,6 @@ from discord.app_commands import (
     locale_str as _T,
     Translator,
     TranslationContext,
-    Command
 )
 
 from utils.lumberjack import get_lumberjack
