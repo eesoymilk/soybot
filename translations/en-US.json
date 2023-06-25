@@ -90,18 +90,26 @@
             "command_name": "emoji_kitchen",
             "command_description": "Mix emojis together!",
             "parameter_name": {
-                "emoji1": "first_emoji",
-                "emoji2": "second_emoji"
+                "emojis": "emojis"
             },
             "parameter_description": {
-                "emoji1": "Enter a unicode emoji",
-                "emoji2": "Enter a unicode emoji (random if left empty)"
+                "emojis": "Enter one or two unicode emoji(s)"
+            },
+            "other": {
+                "help": "You can refer to the following website for all possible combinations:\n{}",
+                "err_none": "Please enter at least one valid unicode emoji.",
+                "err_many": "We can only merge TWO emojis.",
+                "err_unsupported": "{} not supported emoji(s).",
+                "err_failed": "Failed to combine {0[0].emoji} with {0[1].emoji}."
             }
         },
 
         "reaction_poll": {
             "command_name": "poll",
-            "command_description": "Start a reaction poll"
+            "command_description": "Start a reaction poll",
+            "other": {
+                "help": "{}'s poll"
+            }
         }
     },
     "shared": {

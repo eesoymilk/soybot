@@ -3,98 +3,153 @@ import random
 from typing import Optional
 from urllib.parse import urljoin
 
+from emoji import emoji_list
 from discord import app_commands as ac, Interaction
+from discord.app_commands import Transformer, Transform, Range
 from discord.ext.commands import Cog, Bot
-from discord.interactions import Interaction
 
-from utils import get_lumberjack, cd_but_soymilk, EmojiKitchen
+from utils import get_lumberjack, cd_but_soymilk
 
 log = get_lumberjack(__name__)
 
 
-def emoji_to_unicode(*emojis: str, sep: str = '-') -> tuple[Optional[str]]:
-    """Convert a emoji in string to unicode string 
-    and check if it's supported by Emoji Kitchen."""
-    res: list[Optional[str]] = []
-    for emoji in emojis:
-        if emoji is None:
-            res.append(None)
-            continue
-        code = sep.join([(f'{ord(c):X}') for c in emoji]).lower()
-        if code not in EmojiKitchen.SUPPORTED_EMOJIS:
-            raise ValueError(f'{emoji} is not a supported emoji.')
-        res.append(code)
-    return tuple(res)
+class UnicodeEmoji:
+    __slots__ = ('emoji', 'unicode', 'prefixed')
+
+    def __init__(
+        self,
+        emoji: str,
+        unicode: Optional[str] = None,
+        prefixed: Optional[str] = None
+    ):
+        self.emoji = emoji
+        self.unicode = '-'.join(
+            [f'{ord(c):X}' for c in emoji]
+        ).lower() if unicode is None else unicode
+        self.prefixed = '-'.join(
+            f'u{part}' for part in self.unicode.split('-')
+        ) if prefixed is None else prefixed
+
+    @staticmethod
+    def from_unicode(unicode: str):
+        emoji = ''.join(chr(int(part, 16)) for part in unicode.split('-'))
+        return UnicodeEmoji(emoji, unicode)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.emoji})'
 
 
-def prefix_unicode(code: str, prefix: str = 'u', sep: str = '-'):
-    """Prefix unicode parts widockth 'u'."""
-    return sep.join(f'{prefix}{part}' for part in code.split(sep))
+class UnicodeEmojiTransformer(Transformer):
+    async def transform(
+        self,
+        intx: Interaction,
+        value: Range[str, 1, 2]
+    ) -> tuple[UnicodeEmoji]:
+        return tuple([UnicodeEmoji(e['emoji']) for e in emoji_list(value)])
 
 
-def find_output(entries: list[dict], code1: str, code2: str):
-    """Find the emoji output from the provided codes in emojiOutput.json."""
-    if code2 is None:
-        return random.choice(entries)
-
-    if code1 == code2:
-        return next((
-            entry for entry in entries
-            if entry['leftEmoji'] == code1 and entry['rightEmoji'] == code1
-        ))
-
-    return next((
-        entry for entry in entries
-        if code2 in (entry['leftEmoji'], entry['rightEmoji'])
-    ))
+class EmojiKitchenError(Exception):
+    def __init__(self, *emojis: UnicodeEmoji):
+        self.emojis = emojis
 
 
 class EmojiKitchenCog(Cog):
 
+    OUTPUT_PATH = './assets/emojiOutput.json'
+
+    ROOT_URL = 'https://www.gstatic.com/android/keyboard/emojikitchen'
+
+    REF_URL = 'https://emojikitchen.dev/'
+
     def __init__(self, bot: Bot):
         self.bot = bot
 
-        with open(EmojiKitchen.OUTPUT_PATH) as f:
-            self.outputs = json.load(f)
+        with open(self.OUTPUT_PATH) as f:
+            self.emoji_kitchen = json.load(f)
             log.info(f'{f.name} loaded')
 
     def cog_unload(self):
-        del self.outputs
+        del self.emoji_kitchen
 
-    @ac.command()
-    @ac.describe(emoji1='emoji1', emoji2='emoji2')
+    def merge(
+        self, emojis: tuple[UnicodeEmoji]
+    ) -> tuple[UnicodeEmoji, UnicodeEmoji, str]:
+        if len(emojis) < 1 or len(emojis) > 2:
+            raise ValueError('too many emojis')
+
+        if unsupported := ([
+            e for e in emojis if e.unicode not in self.emoji_kitchen.keys()
+        ]):
+            raise EmojiKitchenError(*unsupported)
+
+        entries = self.emoji_kitchen[emojis[0].unicode]
+
+        if len(emojis) == 1:
+            output: dict = random.choice(entries)
+        elif emojis[0] == emojis[1]:
+            output: dict = next((
+                entry for entry in entries
+                if entry['leftEmoji'] == emojis[0].unicode
+                and entry['rightEmoji'] == emojis[0].unicode
+            ))
+        else:
+            output: dict = next((
+                entry for entry in entries
+                if emojis[1].unicode in (
+                    entry['leftEmoji'], entry['rightEmoji']
+                )
+            ))
+
+        left_unicode, right_unicode, date = output.values()
+        left_emoji = UnicodeEmoji.from_unicode(left_unicode)
+        right_emoji = UnicodeEmoji.from_unicode(right_unicode)
+
+        return left_emoji, right_emoji, date
+
+    @ac.command(name='emoji_kitchen')
+    @ac.describe(emojis='emojis')
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
-    async def emoji_kitchen(
+    async def _emoji_kitchen(
         self,
         intx: Interaction,
-        emoji1: str,
-        emoji2: Optional[str] = None
+        emojis: Transform[tuple[UnicodeEmoji], UnicodeEmojiTransformer]
     ):
         """App command that mixes the provided emojis together."""
-        await intx.response.defer(thinking=True)
 
         try:
-            code1, code2 = emoji_to_unicode(emoji1, emoji2)
-            # code2 = emoji_to_unicode(emoji2) if emoji2 is not None else None
-            output = find_output(self.outputs[code1], code1, code2)
+            if len(emojis) == 0:
+                raise ValueError('err_none')
+            if len(emojis) >= 3:
+                raise ValueError('err_many')
 
-            left_emoji, right_emoji, date = output.values()
-            left_emoji = prefix_unicode(left_emoji)
-            right_emoji = prefix_unicode(right_emoji)
-            path = f'{date}/{left_emoji}/{left_emoji}_{right_emoji}.png'
-            output_url = urljoin(EmojiKitchen.ROOT_URL, path)
+            left_emoji, right_emoji, date = self.merge(emojis)
 
-            await intx.followup.send(output_url)
+            output_url = '/'.join([
+                self.ROOT_URL,
+                date,
+                left_emoji.prefixed,
+                f'{left_emoji.prefixed}_{right_emoji.prefixed}.png'
+            ])
 
-        except (ValueError, StopIteration) as e:
-            if isinstance(e, StopIteration):
-                msg = f'Failed to combine {emoji1} with {emoji2}.'
+            await intx.response.send_message(output_url)
+
+        except (ValueError, StopIteration, EmojiKitchenError) as err:
+            if isinstance(err, EmojiKitchenError):
+                sep = '、' if intx.locale.value == 'zh-TW' else ', '
+                err_msg = (
+                    await intx.translate('err_unsupported')
+                ).format(sep.join([e.emoji for e in err.emojis]))
+            elif isinstance(err, StopIteration):
+                err_msg = (
+                    await intx.translate('err_failed')
+                ).format(emojis)
             else:
-                msg = str(e)
+                err_msg = await intx.translate(f'{err}')
 
-            await intx.followup.send(
-                f'{msg}\n' +
-                'Please refer to https://emojikitchen.dev/ for all combinations.',
+            help_msg = (await intx.translate('help')).format(self.REF_URL)
+
+            await intx.response.send_message(
+                f'{err_msg}\n\n{help_msg}',
                 ephemeral=True
             )
 
@@ -102,8 +157,7 @@ class EmojiKitchenCog(Cog):
             f'{intx.user}',
             f'{intx.guild}',
             f'{intx.channel}',
-            f'{emoji1=}',
-            f'{emoji2=}'
+            f'{emojis=}',
         ]))
 
 

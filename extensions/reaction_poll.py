@@ -4,7 +4,9 @@ from discord import (
     app_commands as ac,
     Interaction,
     Embed,
-    TextStyle)
+    TextStyle
+)
+from discord.app_commands import locale_str as _T
 from discord.ext.commands import Bot
 from discord.ui import Modal, TextInput
 from utils import get_lumberjack, cd_but_soymilk
@@ -58,8 +60,7 @@ class SimplePollModal(Modal, title='Simple Reaction Poll'):
             name=f'由 {intx.user.display_name} 發起的投票',
             icon_url=intx.user.display_avatar
         ).set_footer(
-            text='soybot is currently at beta.\n' +
-                 'Please report bugs to eeSoymilk#4231 if you encounter any.'
+            text=await intx.translate(_T('beta', shared=True))
         )
         for rxn, option in zip(self.poll_reactions, options):
             embed.add_field(name=rxn, value=option)

@@ -92,12 +92,17 @@
             "command_name": "emoji_kitchen",
             "command_description": "用 emoji kitchent 組合表情吧！",
             "parameter_name": {
-                "emoji1": "第一個表情符號",
-                "emoji2": "第二個表情符號"
+                "emojis": "表情符號"
             },
             "parameter_description": {
-                "emoji1": "輸入一個非自訂的表情符號",
-                "emoji2": "輸入一個非自訂的表情符號（空白會隨機與第一個做組合）"
+                "emojis": "輸入一至兩個非自訂的表情符號"
+            },
+            "other": {
+                "help": "你可以在這個網站上查看所有表情組合：\n{}",
+                "err_none": "請輸入至少一個表情符號！",
+                "err_many": "僅支援兩個表情符號組合！",
+                "err_unsupported": "並不支援以下表情符號：{}",
+                "err_failed": "無法組合 {0[0].emoji} 和 {0[1].emoji}！"
             }
         },
 

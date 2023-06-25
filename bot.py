@@ -43,7 +43,6 @@ def _prefix_callable(bot: Bot, msg: Message):
 
 class Soybot(Bot):
 
-
     def __init__(self, *args, **kwargs):
         activity = Game(name='Your Mom')
         intents = Intents(
