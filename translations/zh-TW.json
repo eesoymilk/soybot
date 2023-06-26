@@ -108,7 +108,18 @@
 
         "reaction_poll": {
             "command_name": "發起投票",
-            "command_description": "用表情符號投票吧！"
+            "command_description": "用表情符號投票吧！",
+            "other": {
+                "modal_title": "發起投票吧",
+                "title": "投票標題",
+                "desc": "投票描述（非必填）",
+                "desc_placeholder": "本欄可留白",
+                "opts": "投票選項（請在每個選項間換行）",
+                "opts_default": "是\n否",
+                "embed_author": "由 {} 發起的投票",
+                "err_few": "**請提供至少兩個選項！**\n您只提供了 **{}** 個選項：{}",
+                "err_many": "**選項個數上限為20！**\n您提供了 **{}** 個選項：{}"
+            }
         }
     },
 

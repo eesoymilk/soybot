@@ -17,6 +17,7 @@
                 "embed_channel": "Target Channel"
             }
         },
+
         "avatar_slash": {
             "command_name": "avatar",
             "command_description": "Inspect someone's avatar/banner",
@@ -28,6 +29,7 @@
             },
             "other": {}
         },
+
         "avatar_ctx_menu": {
             "command_name": "avatar",
             "other": {}
@@ -108,10 +110,19 @@
             "command_name": "poll",
             "command_description": "Start a reaction poll",
             "other": {
-                "help": "{}'s poll"
+                "modal_title": "Start a reaction poll",
+                "title": "Poll title",
+                "desc": "Poll description (optional)",
+                "desc_placeholder": "This field is not required",
+                "opts": "Poll's options (one line for each option)",
+                "opts_default": "Yes\nNo",
+                "embed_author": "{}'s poll",
+                "err_few": "**You need at least 2 options to start the poll!**\nOnly **{}** option received: {}",
+                "err_many": "**There can at most be 20 options.**\n**{}** options recived received: {}"
             }
         }
     },
+
     "shared": {
         "random": "random",
         "beta": "soybot is currently at beta.\nFeel free to give us feedback!"

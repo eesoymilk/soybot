@@ -39,9 +39,15 @@ class SoybotTranslator(Translator):
         """
         `locale_str` is the string that is requesting to be translated
         `locale` is the target language to translate to
-        `context` is the origin of this string, eg TranslationContext.command_name, etc
-        This function must return a string (that's been translated), or `None` to signal no available translation available, and will default to the original.
+        `context` is the origin of this string, 
+            eg TranslationContext.command_name, etc
+        ---
+        This function must return a string (that's been translated), 
+        or `None` to signal no available translation available, 
+        and will default to the original.
         """
+        if context.location.name == 'other':
+            log.warning(f'{string} | {context} | {context.data}')
 
         locale = locale.value
         location = context.location.name

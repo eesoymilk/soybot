@@ -1,4 +1,5 @@
 import asyncio
+from typing import NamedTuple
 
 from discord import (
     app_commands as ac,
@@ -14,73 +15,122 @@ from utils import get_lumberjack, cd_but_soymilk
 log = get_lumberjack(__name__)
 
 
-class SimplePollModal(Modal, title='Simple Reaction Poll'):
-
-    poll_reactions = (
-        '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
-        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟',)
-
-    form_title = TextInput(
-        label='投票標題',
-    )
-
-    form_description = TextInput(
-        label='投票說明',
-        placeholder='非必填',
-        required=False,)
-
-    form_options = TextInput(
-        label='投票選項 (一個選項換一行)',
-        style=TextStyle.long,
-        default='Yes\nNo',)
-
-    # TODO: options validation
-    async def on_submit(self, intx: Interaction):
-        log.info(f'{intx.user}\'s Modal received.')
-
-        title = self.form_title.value.strip()
-        description = self.form_description.value.strip()
-        options = []
-        for option in self.form_options.value.split('\n'):
-            if option in options:
-                continue
-            options.append(option)
-
-        if (length := len(options)) < 2:
-            await intx.response.send_message(
-                f'**cannot make a poll with {length} option(s)**',
-                ephemeral=True)
-            return
-
-        embed = Embed(
-            color=intx.user.color,
-            title=title,
-            description=description,
-        ).set_author(
-            name=f'由 {intx.user.display_name} 發起的投票',
-            icon_url=intx.user.display_avatar
-        ).set_footer(
-            text=await intx.translate(_T('beta', shared=True))
+class ReactionPollModal(Modal):
+    def __init__(
+        self,
+        modal_title: str,
+        form_title: TextInput, 
+        form_desc: TextInput, 
+        form_opts: TextInput,
+    ):
+        self.form_title = form_title
+        self.form_desc = form_desc
+        self.form_opts = form_opts
+        self.rxns = (
+            '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
+            '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟',
         )
-        for rxn, option in zip(self.poll_reactions, options):
-            embed.add_field(name=rxn, value=option)
+        
+        super().__init__(title=modal_title)
+        
+        self.add_item(
+            form_title
+        ).add_item(
+            form_desc
+        ).add_item(
+            form_opts
+        )
 
-        await intx.response.send_message(embed=embed)
+    async def on_submit(self, intx: Interaction):
+        # pass this namedtuple to data parameter when translating
+        # this helps resolving the correct keys in translation dict
+        command = (NamedTuple('DummyCommand', name=str))('reaction_poll')
+        try:
+            log.info(f'{intx.user}\'s Modal received.')
+            title = self.form_title.value.strip()
+            desc = self.form_desc.value.strip()
+            opts = []
+            for opt in self.form_opts.value.split('\n'):
+                if opt not in opts:
+                    opts.append(opt)
 
-        poll_msg = await intx.original_response()
-        await asyncio.gather(*[
-            poll_msg.add_reaction(rxn)
-            for rxn, _ in zip(self.poll_reactions, options)])
+            n_opts = len(opts)
+            if n_opts < 2:
+                raise ValueError('err_few')
+            
+            if n_opts > 20:
+                raise ValueError('err_many')
+                
+            opt_fileds = [{
+                'name': rxn,
+                'value': opt
+            } for rxn, opt in zip(self.rxns, opts)]
+            
+            embed = Embed(
+                title=title,
+                description=desc,
+                color=intx.user.color,
+            ).set_author(
+                name=(
+                    await intx.translate('embed_author', data=command)
+                ).format(intx.user.display_name),
+                icon_url=intx.user.display_avatar,
+            ).set_footer(
+                text=await intx.translate(_T('beta', shared=True))
+            )
+            
+            for opt_field in opt_fileds:
+                embed.add_field(**opt_field)
+                
+            await intx.response.send_message(embed=embed)
+            poll_msg = await intx.original_response()
+            await asyncio.gather(*[
+                poll_msg.add_reaction(opt_field['name'])
+                for opt_field in opt_fileds
+            ])
 
-        log.info(f'{intx.user}\'s poll started.')
+            log.info(f'{intx.user}\'s poll started.')
 
+        except ValueError as err:
+            sep = '、' if intx.locale.value == 'zh-TW' else ', '
+            err_msg = (
+                await intx.translate(f'{err}', data=command)
+            ).format(
+                n_opts, sep.join(opts)
+            )
+            await intx.response.send_message(err_msg, ephemeral=True)
 
 @ac.command()
 @ac.guild_only()
 @ac.checks.dynamic_cooldown(cd_but_soymilk)
 async def reaction_poll(intx: Interaction):
-    await intx.response.send_modal(SimplePollModal())
+    modal_title = await intx.translate('modal_title')
+    form_title = TextInput(
+        label=await intx.translate('title'),
+        max_length=256,
+    )
+    form_desc = TextInput(
+        label=await intx.translate('desc'),
+        placeholder=await intx.translate('desc_placeholder'),
+        required=False,
+        max_length=4000,
+    )
+    form_opts = TextInput(
+        label=await intx.translate('opts'),
+        style=TextStyle.long,
+        default=await intx.translate('opts_default'),
+        max_length=1024,
+    )
 
+    modal = ReactionPollModal(
+        modal_title,
+        form_title, 
+        form_desc, 
+        form_opts,
+    )
+
+    await intx.response.send_modal(modal)
+    
 
 async def setup(bot: Bot):
     bot.tree.add_command(reaction_poll)

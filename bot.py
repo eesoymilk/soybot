@@ -1,5 +1,4 @@
 import aiohttp
-import logging
 
 from discord import (
     Message,
@@ -84,11 +83,11 @@ class Soybot(Bot):
     async def on_app_command_error(
         self,
         intx: Interaction,
-        e: AppCommandError
+        err: AppCommandError
     ):
-        if isinstance(e, CommandOnCooldown):
+        if isinstance(err, CommandOnCooldown):
             await intx.response.send_message(
-                f'冷卻中...\n請稍後**{str(round(e.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試',
+                f'冷卻中...\n請稍後**{str(round(err.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試',
                 ephemeral=True)
         else:
-            log.exception(e)
+            log.exception(err)
