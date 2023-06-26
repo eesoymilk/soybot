@@ -16,6 +16,34 @@ log = get_lumberjack(__name__)
 
 
 class ReactionPollModal(Modal):
+    # pass this namedtuple to data parameter when translating
+    # this helps resolving the correct keys in translation dict
+    command = (NamedTuple('DummyCommand', name=str))('reaction_poll')
+    
+    default_reactions = (
+        '1️⃣', 
+        '2️⃣', 
+        '3️⃣', 
+        '4️⃣', 
+        '5️⃣', 
+        '6️⃣', 
+        '7️⃣', 
+        '8️⃣', 
+        '9️⃣',
+        '🇦', 
+        '🇧', 
+        '🇨', 
+        '🇩', 
+        '🇪', 
+        '🇫', 
+        '🇬', 
+        '🇭', 
+        '🇮', 
+        '🇯',
+        '🇰',
+    )
+    
+    
     def __init__(
         self,
         modal_title: str,
@@ -26,10 +54,6 @@ class ReactionPollModal(Modal):
         self.form_title = form_title
         self.form_desc = form_desc
         self.form_opts = form_opts
-        self.rxns = (
-            '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣',
-            '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟',
-        )
         
         super().__init__(title=modal_title)
         
@@ -42,9 +66,6 @@ class ReactionPollModal(Modal):
         )
 
     async def on_submit(self, intx: Interaction):
-        # pass this namedtuple to data parameter when translating
-        # this helps resolving the correct keys in translation dict
-        command = (NamedTuple('DummyCommand', name=str))('reaction_poll')
         try:
             log.info(f'{intx.user}\'s Modal received.')
             title = self.form_title.value.strip()
@@ -62,9 +83,9 @@ class ReactionPollModal(Modal):
                 raise ValueError('err_many')
                 
             opt_fileds = [{
-                'name': rxn,
+                'name': reaction,
                 'value': opt
-            } for rxn, opt in zip(self.rxns, opts)]
+            } for reaction, opt in zip(self.default_reactions, opts)]
             
             embed = Embed(
                 title=title,
@@ -72,7 +93,7 @@ class ReactionPollModal(Modal):
                 color=intx.user.color,
             ).set_author(
                 name=(
-                    await intx.translate('embed_author', data=command)
+                    await intx.translate('embed_author', data=self.command)
                 ).format(intx.user.display_name),
                 icon_url=intx.user.display_avatar,
             ).set_footer(
@@ -94,7 +115,7 @@ class ReactionPollModal(Modal):
         except ValueError as err:
             sep = '、' if intx.locale.value == 'zh-TW' else ', '
             err_msg = (
-                await intx.translate(f'{err}', data=command)
+                await intx.translate(f'{err}', data=self.command)
             ).format(
                 n_opts, sep.join(opts)
             )
