@@ -46,8 +46,6 @@ class SoybotTranslator(Translator):
         or `None` to signal no available translation available, 
         and will default to the original.
         """
-        if context.location.name == 'other':
-            log.warning(f'{string} | {context} | {context.data}')
 
         locale = locale.value
         location = context.location.name
