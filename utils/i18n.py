@@ -76,7 +76,8 @@ class SoybotTranslator(Translator):
 
         except (KeyError, AttributeError, ValueError) as e:
             log.exception(
-                f'Translation failed: {msg} | {locale} | {location} | {e}')
+                f'Translation failed: {msg} | {locale} | {location} | {e}'
+            )
             return None
 
     def _translation_resolution(self, origin, location: str, message: str):

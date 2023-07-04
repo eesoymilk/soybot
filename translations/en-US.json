@@ -18,7 +18,37 @@
             }
         },
 
-        "avatar_slash": {
+        "inspect": {
+            "command_name": "inspect",
+            "command_description": "Inspect someone",
+            "parameter_name": {
+                "target": "target"
+            },
+            "parameter_description": {
+                "target": "Who do you want to inspect?"
+            },
+            "other": {
+                "self_inspection": "{} inspected him/her-self.",
+                "other_inspection": "{0} inspected {1}",
+                "avatar_src": "Avatar Source",
+                "banner_src": "Banner Source"
+            }
+        },
+
+        "inspect_user": {
+            "command_name": "inspect",
+            "parameter_name": {
+                "target": "target"
+            },
+            "other": {
+                "self_inspection": "{} inspected him/her-self.",
+                "other_inspection": "{0} inspected {1}",
+                "avatar_src": "Avatar Source",
+                "banner_src": "Banner Source"
+            }
+        },
+
+        "avatar": {
             "command_name": "avatar",
             "command_description": "Inspect someone's avatar/banner",
             "parameter_name": {

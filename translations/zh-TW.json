@@ -18,6 +18,36 @@
             }
         },
 
+        "inspect": {
+            "command_name": "稽查",
+            "command_description": "來稽查吧！",
+            "parameter_name": {
+                "target": "稽查對象"
+            },
+            "parameter_description": {
+                "target": "你想要稽查誰？"
+            },
+            "other": {
+                "self_inspection": "{} 稽查了自己",
+                "other_inspection": "{0} 稽查了 {1}",
+                "avatar_src": "頭貼圖源",
+                "banner_src": "橫幅圖源"
+            }
+        },
+
+        "inspect_user": {
+            "command_name": "稽查",
+            "parameter_name": {
+                "target": "稽查對象"
+            },
+            "other": {
+                "self_inspection": "{} 稽查了自己",
+                "other_inspection": "{0} 稽查了 {1}",
+                "avatar_src": "頭貼圖源",
+                "banner_src": "橫幅圖源"
+            }
+        },
+
         "avatar_slash": {
             "command_name": "稽查",
             "command_description": "稽查頭貼/橫幅",

@@ -11,7 +11,6 @@ class SoyCommands(Cog):
         self.bot = bot
 
     @ac.command(name='echo')
-    @ac.rename(msg='msg')
     @ac.describe(msg='msg')
     @ac.checks.dynamic_cooldown(cd_but_soymilk)
     async def soy(self, intx: Interaction, msg: str):
