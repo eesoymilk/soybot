@@ -1,12 +1,12 @@
 import json
 import random
 from typing import Optional
-from urllib.parse import urljoin
 
-from emoji import emoji_list
 from discord import app_commands as ac, Interaction
 from discord.app_commands import Transformer, Transform, Range
 from discord.ext.commands import Cog, Bot
+
+from emoji import emoji_list
 
 from utils import get_lumberjack, cd_but_soymilk
 
@@ -65,7 +65,7 @@ class EmojiKitchenCog(Cog):
         self.bot = bot
 
         with open(self.OUTPUT_PATH) as f:
-            self.emoji_kitchen = json.load(f)
+            self.emoji_kitchen: dict[str] = json.load(f)
             log.info(f'{f.name} loaded')
 
     def cog_unload(self):

@@ -51,16 +51,14 @@ def get_lumberjack(name: str, level=logging.INFO) -> Logger:
     if not logger.propagate:
         return logger
 
-    # Configure the logger
+    # Base logger
     logger.propagate = False
     logger.setLevel(level)
 
-    # console handler
+    # Console handler
     ch = StreamHandler()
     ch.setLevel(level)
     ch.setFormatter(ColorFormatter())
 
-    # google handler
     logger.addHandler(ch)
-
     return logger

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from discord import app_commands as ac, Locale
+from discord import Locale
 from discord.app_commands import (
     locale_str as _T,
     Translator,

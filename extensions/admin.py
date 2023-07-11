@@ -3,7 +3,7 @@ import asyncio
 from pathlib import Path
 from typing import Optional, Literal
 
-from discord import Object, HTTPException, Embed
+from discord import Object, Guild, HTTPException
 from discord.ext import commands
 from discord.ext.commands import (
     Cog,
@@ -13,6 +13,7 @@ from discord.ext.commands import (
 )
 
 from utils import get_lumberjack
+from bot import Soybot
 
 log = get_lumberjack(__name__)
 
@@ -30,37 +31,37 @@ class AdminCog(Cog):
         guilds: Greedy[Object],
         spec: Optional[Literal['~', '*', '^']] = None
     ):
-        if not guilds:
-            if spec == '~':
-                log.info('Syncing to current guild...')
-                synced = await ctx.bot.tree.sync(guild=ctx.guild)
-            elif spec == '*':
-                ctx.bot.tree.copy_global_to(guild=ctx.guild)
-                synced = await ctx.bot.tree.sync(guild=ctx.guild)
-            elif spec == '^':
-                ctx.bot.tree.clear_commands(guild=ctx.guild)
-                await ctx.bot.tree.sync(guild=ctx.guild)
-                synced = []
-            else:
-                log.info('Syncing globally...')
-                synced = await ctx.bot.tree.sync()
+        bot: Soybot = ctx.bot
 
-            msg = f'Synced {len(synced)} commands {"globally" if spec is None else "to the current guild."}'
-            log.info(msg)
-            await ctx.send(msg)
+        if guilds:
+            ret = 0
+            for guild in guilds:
+                try:
+                    await bot.tree.sync(guild=guild)
+                except HTTPException:
+                    pass
+                else:
+                    ret += 1
 
-            return
+            return await ctx.send(f'Synced the tree to {ret}/{len(guilds)}.')
 
-        ret = 0
-        for guild in guilds:
-            try:
-                await ctx.bot.tree.sync(guild=guild)
-            except HTTPException:
-                pass
-            else:
-                ret += 1
+        if spec == '~':
+            log.info('Syncing to current guild...')
+            synced = await bot.tree.sync(guild=ctx.guild)
+        elif spec == '*':
+            bot.tree.copy_global_to(guild=ctx.guild)
+            synced = await bot.tree.sync(guild=ctx.guild)
+        elif spec == '^':
+            bot.tree.clear_commands(guild=ctx.guild)
+            await bot.tree.sync(guild=ctx.guild)
+            synced = []
+        else:
+            log.info('Syncing globally...')
+            synced = await bot.tree.sync()
 
-        await ctx.send(f'Synced the tree to {ret}/{len(guilds)}.')
+        msg = f'Synced {len(synced)} commands {"globally" if spec is None else "to the current guild."}'
+        log.info(msg)
+        await ctx.send(msg)
 
     @commands.command(help='Reload extensions', aliases=['r', 're'])
     @commands.guild_only()
@@ -85,6 +86,32 @@ class AdminCog(Cog):
             ) for ext in exts]
 
         await ctx.send(f'**{"**, **".join(exts)}** reloaded')
+
+    # This command update all custom emojis, stickers and users
+    # in the guilds specified
+    @commands.command(
+        help='Database Management Command',
+        aliases=['db', 'sql']
+    )
+    @commands.is_owner()
+    async def db_coro(
+        self,
+        ctx: Context,
+        guilds: Greedy[Object],
+        spec: Optional[str] = None
+    ):
+        await ctx.channel.send('Updating db...')
+
+        bot: Soybot = ctx.bot
+
+        if guilds:
+            guilds = [await bot.fetch_guild(g.id) for g in guilds]
+        elif spec == '*':
+            guilds = [g async for g in bot.fetch_guilds()]
+        else:
+            guilds = [ctx.guild]
+
+        await self.update_guilds(guilds)
 
     def find_extension(self, prompt: str):
         if os.path.isfile(Path('./extensions')/f'{prompt}.py'):
@@ -113,6 +140,19 @@ class AdminCog(Cog):
             return exts
 
         raise ValueError(f'**{", ".join(failed_prompts)}**')
+
+    async def update_stickers(self, guild: Guild) -> int:
+        ...
+
+    async def update_custom_emojis(self, guild: Guild) -> int:
+        ...
+
+    async def update_guild(self, guild: Guild) -> tuple[int, int]:
+        ...
+
+    async def update_guilds(self, *guilds: Guild) -> int:
+        for g in guilds:
+            self.update_guild(g)
 
 
 async def setup(bot: Bot):
