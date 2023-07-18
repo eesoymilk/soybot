@@ -23,6 +23,7 @@ initial_extensions = (
     'extensions.listeners',
     'extensions.reaction_poll',
     'extensions.soy_commands',
+    'extensions.chatbot',
     'extensions.admin',
 )
 
