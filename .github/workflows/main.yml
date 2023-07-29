@@ -11,7 +11,10 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  CONTAINER_NAME: soybot-container
+  # CONTAINER_NAME: soybot-container
+
+  KAMATERA_USER: soymilk
+
   GCPLOGS_AUTH_PATH: /root/.config/gcplogs/auth.json
   GCP_PROJECT: eesoybot
 
@@ -20,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GitHub Action
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -36,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.actor }}/soybot-app
 
       - name: Build and push
         uses: docker/build-push-action@v4
@@ -52,20 +55,26 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: SSH to Kamatera and deploy
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.KAMATERA_HOST }}
-          username: root
-          password: ${{ secrets.KAMATERA_PASSWORD }}
-          script: |
-            docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main || true
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm ${{ env.CONTAINER_NAME }} || true
-            docker run -d \
-              --log-driver=gcplogs \
-              --log-opt gcp-project=${{ env.GCP_PROJECT }} \
-              --env TOKEN=${{ secrets.TOKEN }} \
-              --name ${{ env.CONTAINER_NAME }} \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+      - name: Copy docker-compose.yml to Kamatera
+        run: |
+          echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -o StrictHostKeyChecking=no -i private_key.pem ./docker-compose.yml ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
+
+      # - name: SSH to Kamatera and deploy
+      #   uses: appleboy/ssh-action@v0.1.10
+      #   with:
+      #     host: ${{ secrets.KAMATERA_HOST }}
+      #     username: soymilk
+      #     key: ${{ secrets.KAMATERA_KEY }}
+      #     script: |
+      #       docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main || true
+      #       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+      #       docker stop ${{ env.CONTAINER_NAME }} || true
+      #       docker rm ${{ env.CONTAINER_NAME }} || true
+      #       docker run -d \
+      #         --log-driver=gcplogs \
+      #         --log-opt gcp-project=${{ env.GCP_PROJECT }} \
+      #         --env TOKEN=${{ secrets.TOKEN }} \
+      #         --name ${{ env.CONTAINER_NAME }} \
+      #         ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main

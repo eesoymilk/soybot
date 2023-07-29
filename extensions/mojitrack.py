@@ -3,7 +3,15 @@ import asyncio
 from typing import Optional
 from datetime import datetime
 
-from discord import Message, Reaction, Member, PartialEmoji, Emoji, Sticker
+from discord import (
+    Message,
+    Reaction,
+    Member,
+    Guild,
+    PartialEmoji,
+    Emoji,
+    Sticker,
+)
 from discord.ext.commands import Cog, Bot
 
 from attr import frozen
@@ -35,6 +43,14 @@ class MojitrackCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
+    @staticmethod
+    async def get_or_fetch_emoji(
+        guild: Guild, emoji_id: int
+    ) -> Emoji:
+        if (e := guild.get_emoji(emoji_id)) is not None:
+            return e
+        return await guild.fetch_emoji(emoji_id)
+
     async def _fetch_emoji_usages(
         self, msg: Message, timestamp: datetime
     ) -> tuple[tuple[Emoji | str, ...], tuple[EmojiUsage, ...]]:
@@ -47,7 +63,7 @@ class MojitrackCog(Cog):
 
         # we only need custom emojis from this current guild
         fetched_emojis = await asyncio.gather(*[
-            msg.guild.fetch_emoji(e.id) for e in partial_emojis
+            self.get_or_fetch_emoji(msg.guild, e.id) for e in partial_emojis
         ], return_exceptions=True)
         custom_emojis = [r for r in fetched_emojis if isinstance(r, Emoji)]
 
