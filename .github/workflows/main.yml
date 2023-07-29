@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is pushing to Kamatera
 on:
   push:
     paths:
-      - ".github/workflows/main.yml"
+      - ".github/workflows/**.yml"
       - "Dockerfile"
       - "**.py"
       - "requirements.txt"
@@ -82,6 +82,7 @@ jobs:
 
             export DISCORD_TOKEN=${{ secrets.TOKEN }}
             export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            export GCP_PROJECT=${{ env.GCP_PROJECT }}
             export POSTGRES_PORT=${{ env.POSTGRES_PORT }}
             export POSTGRES_USER=${{ env.POSTGRES_USER }}
             export POSTGRES_DB=${{ env.POSTGRES_DB }}
