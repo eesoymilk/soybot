@@ -65,7 +65,6 @@ async def main():
     load_enviorment(env_file)
 
     async with Soybot(command_prefix=command_prefix) as bot:
-        # bot.db: AsyncIOMotorDatabase = motor_client.eesoybot
         await bot.start(os.getenv('TOKEN'))
 
 
