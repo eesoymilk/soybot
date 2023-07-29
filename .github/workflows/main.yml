@@ -15,6 +15,7 @@ env:
 
   KAMATERA_USER: soymilk
   KAMATERA_PORT: 22
+  KAMATERA_PATH: ~/app/soybot
 
   POSTGRES_PORT: 5432
   POSTGRES_USER: postgres
@@ -65,7 +66,7 @@ jobs:
           -i private_key.pem \
           -P ${{ env.KAMATERA_PORT }} \
           ./docker-compose.yml \
-          ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
+          ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:${{ env.KAMATERA_PATH }}
 
   deploy:
     needs: build-and-push
@@ -78,9 +79,9 @@ jobs:
           username: soymilk
           key: ${{ secrets.KAMATERA_KEY }}
           script: |
-            cd ~/app/soybot
+            cd ${{ env.KAMATERA_PATH }}
 
-            export DISCORD_TOKEN=${{ secrets.TOKEN }}
+            export TOKEN=${{ secrets.TOKEN }}
             export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             export GCP_PROJECT=${{ env.GCP_PROJECT }}
             export POSTGRES_PORT=${{ env.POSTGRES_PORT }}
