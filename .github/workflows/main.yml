@@ -81,6 +81,7 @@ jobs:
             cd ~/app/soybot
 
             export DISCORD_TOKEN=${{ secrets.TOKEN }}
+            export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             export POSTGRES_PORT=${{ env.POSTGRES_PORT }}
             export POSTGRES_USER=${{ env.POSTGRES_USER }}
             export POSTGRES_DB=${{ env.POSTGRES_DB }}
