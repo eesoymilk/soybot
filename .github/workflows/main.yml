@@ -14,6 +14,12 @@ env:
   # CONTAINER_NAME: soybot-container
 
   KAMATERA_USER: soymilk
+  KAMATERA_PORT: 22
+
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_DB: soybot
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
   GCPLOGS_AUTH_PATH: /root/.config/gcplogs/auth.json
   GCP_PROJECT: eesoybot
@@ -59,22 +65,26 @@ jobs:
         run: |
           echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -o StrictHostKeyChecking=no -i private_key.pem ./docker-compose.yml ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
+          scp -o StrictHostKeyChecking=no \
+          -i private_key.pem ./docker-compose.yml \
+          ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:${{ env.KAMATERA_PORT }}:~/app/soybot/docker-compose.yml
 
-      # - name: SSH to Kamatera and deploy
-      #   uses: appleboy/ssh-action@v0.1.10
-      #   with:
-      #     host: ${{ secrets.KAMATERA_HOST }}
-      #     username: soymilk
-      #     key: ${{ secrets.KAMATERA_KEY }}
-      #     script: |
-      #       docker rmi -f ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main || true
-      #       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
-      #       docker stop ${{ env.CONTAINER_NAME }} || true
-      #       docker rm ${{ env.CONTAINER_NAME }} || true
-      #       docker run -d \
-      #         --log-driver=gcplogs \
-      #         --log-opt gcp-project=${{ env.GCP_PROJECT }} \
-      #         --env TOKEN=${{ secrets.TOKEN }} \
-      #         --name ${{ env.CONTAINER_NAME }} \
-      #         ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+      - name: SSH to Kamatera and deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.KAMATERA_HOST }}
+          username: soymilk
+          key: ${{ secrets.KAMATERA_KEY }}
+          script: |
+            cd ~/app/soybot
+
+            export DISCORD_TOKEN=${{ secrets.TOKEN }}
+            export POSTGRES_PORT=${{ env.POSTGRES_PORT }}
+            export POSTGRES_USER=${{ env.POSTGRES_USER }}
+            export POSTGRES_DB=${{ env.POSTGRES_DB }}
+            export POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}
+
+            sudo docker compose down
+            sudo docker system prune -f
+            sudo docker compose pull
+            sudo docker compose up -d
