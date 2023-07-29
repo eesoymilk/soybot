@@ -68,7 +68,7 @@ jobs:
           ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
 
   deploy:
-    needs: build
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: SSH to Kamatera and deploy
