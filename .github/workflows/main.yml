@@ -66,8 +66,10 @@ jobs:
           echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -o StrictHostKeyChecking=no \
-          -i private_key.pem ./docker-compose.yml \
-          ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:${{ env.KAMATERA_PORT }}:~/app/soybot/docker-compose.yml
+          -i private_key.pem \
+          -P ${{ env.KAMATERA_PORT }} \
+          ./docker-compose.yml \
+          ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
 
       - name: SSH to Kamatera and deploy
         uses: appleboy/ssh-action@v0.1.10
