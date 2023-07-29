@@ -57,10 +57,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Copy docker-compose.yml to Kamatera
         run: |
           echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
@@ -71,6 +67,10 @@ jobs:
           ./docker-compose.yml \
           ${{ env.KAMATERA_USER }}@${{ secrets.KAMATERA_HOST }}:~/app/soybot
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: SSH to Kamatera and deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
