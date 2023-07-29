@@ -1,4 +1,4 @@
-name: deploy-to-kamatera-server
+name: Build and deploy-to-kamatera-server
 run-name: ${{ github.actor }} is pushing to Kamatera
 on:
   push:
@@ -25,7 +25,7 @@ env:
   GCP_PROJECT: eesoybot
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GitHub Action
@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -v -o StrictHostKeyChecking=no \
+          scp -o StrictHostKeyChecking=no \
           -i private_key.pem \
           -P ${{ env.KAMATERA_PORT }} \
           ./docker-compose.yml \
@@ -86,7 +86,7 @@ jobs:
             export POSTGRES_DB=${{ env.POSTGRES_DB }}
             export POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}
 
-            sudo docker compose down
-            sudo docker system prune -f
-            sudo docker compose pull
-            sudo docker compose up -d
+            docker compose down
+            docker system prune -f
+            docker compose pull
+            docker compose up -d
