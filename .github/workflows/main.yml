@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "${{ secrets.KAMATERA_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -o StrictHostKeyChecking=no \
+          scp -v -o StrictHostKeyChecking=no \
           -i private_key.pem \
           -P ${{ env.KAMATERA_PORT }} \
           ./docker-compose.yml \
