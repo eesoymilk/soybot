@@ -5,8 +5,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - $HOME/.config/gcloud/application_default_credentials.json:/gcp/creds.json
+    # volumes:
+    #   - $HOME/.config/gcloud/application_default_credentials.json:/gcp/creds.json
     environment:
       TOKEN: ${TOKEN}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -15,8 +15,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      GOOGLE_APPLICATION_CREDENTIALS: /gcp/creds.json
-      GCPLOGS_AUTH_PATH: /gcp/creds.json
+      # GOOGLE_APPLICATION_CREDENTIALS: /gcp/creds.json
+      # GCPLOGS_AUTH_PATH: /gcp/creds.json
     logging:
       driver: gcplogs
       options:
