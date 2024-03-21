@@ -23,7 +23,7 @@ services:
         gcp-project: ${GCP_PROJECT}
 
   db:
-    image: postgres:latest
+    image: postgres:15.2
     restart: always
     user: postgres
     environment:
