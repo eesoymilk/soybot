@@ -25,8 +25,8 @@ A discord bot written in `discord.py` by eesoymilk.
   - Option 1: Docker
     This is the recommended way to start this bot. Make sure you have docker installed and run the following commands:
     ```shell
-    docker build -t <image-name:tag> .
-    docker run --env-file=.env --name <container-name> <image-name:tag>
+    docker compose pull
+    docker compose --env-file <path/to/.env> up
     ```
 
   - Option 2: Without docker (not recommended)
