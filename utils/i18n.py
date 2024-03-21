@@ -31,19 +31,16 @@ class SoybotTranslator(Translator):
         del self.translations
 
     async def translate(
-        self,
-        string: _T,
-        locale: Locale,
-        context: TranslationContext
+        self, string: _T, locale: Locale, context: TranslationContext
     ) -> Optional[str]:
         """
         `locale_str` is the string that is requesting to be translated
         `locale` is the target language to translate to
-        `context` is the origin of this string, 
+        `context` is the origin of this string,
             eg TranslationContext.command_name, etc
         ---
-        This function must return a string (that's been translated), 
-        or `None` to signal no available translation available, 
+        This function must return a string (that's been translated),
+        or `None` to signal no available translation available,
         and will default to the original.
         """
 
@@ -85,7 +82,7 @@ class SoybotTranslator(Translator):
             'command_name',
             'command_description',
             'group_name',
-            'group_description'
+            'group_description',
         ):
             command_name, key = origin.name, None
         elif location in ('parameter_name', 'parameter_description'):

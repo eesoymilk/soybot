@@ -1,4 +1,4 @@
-FROM python:3-alpine3.18
+FROM python:3.12.2-alpine
 
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
