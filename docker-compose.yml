@@ -16,13 +16,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       GOOGLE_APPLICATION_CREDENTIALS: /gcp/creds.json
+      GCPLOGS_AUTH_PATH: /gcp/creds.json
     logging:
       driver: gcplogs
       options:
         gcp-project: ${GCP_PROJECT}
 
   db:
-    image: postgres:15.2
+    image: postgres:latest
     restart: always
     user: postgres
     environment:

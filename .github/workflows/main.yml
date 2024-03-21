@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/**.yml"
       - "Dockerfile"
+      - "docker-compose.yml"
       - "**.py"
       - "requirements.txt"
 
