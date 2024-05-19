@@ -78,7 +78,7 @@ jobs:
               docker stop soybot
             fi
 
-            docker pull ghcr.io/soymilk/soybot:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
 
             docker run -d \
               --name soybot \
@@ -87,4 +87,4 @@ jobs:
               -e GCP_PROJECT=${{ secrets.GCP_PROJECT }} \
               --log-driver=gcplogs \
               --log-opt gcp-project=${{ env.GCP_PROJECT }} \
-              ghcr.io/soymilk/soybot:latest
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
