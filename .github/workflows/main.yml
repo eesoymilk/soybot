@@ -19,6 +19,12 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+
     steps:
       - name: Checkout GitHub Action
         uses: actions/checkout@v3
