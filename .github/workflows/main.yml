@@ -13,7 +13,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   KAMATERA_USER: soymilk
   KAMATERA_PORT: 22
-  KAMATERA_PATH: ~/app/soybot
   GCPLOGS_AUTH_PATH: /root/.config/gcplogs/auth.json
   GCP_PROJECT: eesoybot
 
@@ -41,7 +40,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.actor }}/soybot
 
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
