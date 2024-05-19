@@ -74,9 +74,9 @@ jobs:
             docker stop soybot || true
             docker run -d \
               --name soybot \
-              -e TOKEN=${ secrets.TOKEN } \
-              -e OPENAI_API_KEY=${ secrets.OPENAI_API_KEY } \
-              -e GCP_PROJECT=${ secrets.GCP_PROJECT } \
+              -e TOKEN=${{ secrets.TOKEN }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e GCP_PROJECT=${{ secrets.GCP_PROJECT }} \
               --log-driver=gcplogs \
-              --log-opt gcp-project=${ env.GCP_PROJECT } \
+              --log-opt gcp-project=${{ env.GCP_PROJECT }} \
               ghcr.io/soymilk/soybot:latest
