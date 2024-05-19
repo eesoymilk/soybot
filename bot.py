@@ -16,35 +16,21 @@ from utils.i18n import SoybotTranslator
 
 log = get_lumberjack(__name__)
 initial_extensions = (
-    'extensions.help',
-    'extensions.inspect',
-    'extensions.emoji_kitchen',
-    'extensions.waifu',
-    'extensions.listeners',
-    'extensions.reaction_poll',
-    'extensions.soy_commands',
-    'extensions.chatbot',
-    'extensions.admin',
+    "extensions.help",
+    "extensions.inspect",
+    "extensions.emoji_kitchen",
+    "extensions.waifu",
+    "extensions.listeners",
+    "extensions.reaction_poll",
+    "extensions.soy_commands",
+    "extensions.chatbot",
+    "extensions.admin",
 )
-
-# TODO: more flexible command prefix
-
-
-def _prefix_callable(bot: Bot, msg: Message):
-    user_id = bot.user.id
-    base = [f'<@!{user_id}> ', f'<@{user_id}> ']
-    if msg.guild is None:
-        base.append('!')
-        base.append('?')
-    else:
-        base.extend(bot.prefixes.get(msg.guild.id, ['?', '!']))
-    return base
 
 
 class Soybot(Bot):
-
     def __init__(self, *args, **kwargs):
-        activity = Game(name='Your Mom')
+        activity = Game(name="🥛 Drinking Soymilk 🥛")
         intents = Intents(
             guilds=True,
             members=True,
@@ -55,11 +41,7 @@ class Soybot(Bot):
             reactions=True,
             message_content=True,
         )
-        super().__init__(
-            intents=intents,
-            activity=activity,
-            **kwargs
-        )
+        super().__init__(intents=intents, activity=activity, **kwargs)
 
     async def setup_hook(self):
         self.bot_app_info = await self.application_info()
@@ -70,9 +52,9 @@ class Soybot(Bot):
         for ext in initial_extensions:
             try:
                 await self.load_extension(ext)
-                log.info(f'{ext} loaded')
+                log.info(f"{ext} loaded")
             except Exception as e:
-                log.exception(f'Failed to load extension {ext}.')
+                log.exception(f"Failed to load extension {ext}: {e}")
 
         self.tree.on_error = self.on_app_command_error
         await self.tree.set_translator(SoybotTranslator())
@@ -82,13 +64,12 @@ class Soybot(Bot):
         return self.bot_app_info.owner
 
     async def on_app_command_error(
-        self,
-        intx: Interaction,
-        err: AppCommandError
+        self, intx: Interaction, err: AppCommandError
     ):
         if isinstance(err, CommandOnCooldown):
             await intx.response.send_message(
                 f'冷卻中...\n請稍後**{str(round(err.retry_after, 1)).rstrip("0").rstrip(".")}**秒再試',
-                ephemeral=True)
+                ephemeral=True,
+            )
         else:
             log.exception(err)
