@@ -74,7 +74,12 @@ jobs:
           username: soymilk
           key: ${{ secrets.KAMATERA_KEY }}
           script: |
-            docker stop soybot || true
+            if [ $(docker ps -q -f name=soybot) ]; then
+              docker stop soybot
+            fi
+
+            docker pull ghcr.io/soymilk/soybot:latest
+
             docker run -d \
               --name soybot \
               -e TOKEN=${{ secrets.TOKEN }} \
