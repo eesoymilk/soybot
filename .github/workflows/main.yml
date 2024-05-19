@@ -70,7 +70,7 @@ jobs:
             fi
 
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
-
+            docker system prune -f
             docker run -d \
               --name soybot \
               -e TOKEN=${{ secrets.TOKEN }} \
