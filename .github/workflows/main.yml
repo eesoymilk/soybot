@@ -66,6 +66,7 @@ jobs:
           script: |
             if [ $(docker ps -q -f name=soybot) ]; then
               docker stop soybot
+              docker rm soybot
             fi
 
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
